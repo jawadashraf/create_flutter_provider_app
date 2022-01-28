@@ -27,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Text(
           AppLocalizations.of(context).translate("splashTitle"),
           style: TextStyle(
-            fontSize: Theme.of(context).textTheme.headline!.fontSize,
+            fontSize: Theme.of(context).textTheme.headline5!.fontSize,
           ),
         )),
         FlutterLogo(

@@ -72,7 +72,7 @@ class MyApp extends StatelessWidget {
                   darkTheme: AppThemes.darkTheme,
                   themeMode: themeProviderRef.isDarkModeOn
                       ? ThemeMode.dark
-                      : ThemeMode.light,
+                      : ThemeMode.dark,
                   home: Consumer<AuthProvider>(
                     builder: (_, authProviderRef, __) {
                       if (userSnapshot.connectionState ==

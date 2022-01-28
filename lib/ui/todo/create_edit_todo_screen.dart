@@ -25,15 +25,14 @@ class _CreateEditTodoScreenState extends State<CreateEditTodoScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final TodoModel? _todoModel = ModalRoute.of(context)?.settings.arguments as TodoModel?;
+    final TodoModel? _todoModel =
+        ModalRoute.of(context)?.settings.arguments as TodoModel?;
     if (_todoModel != null) {
       _todo = _todoModel;
     }
 
-    _taskController =
-        TextEditingController(text: _todo?.task ?? "");
-    _extraNoteController =
-        TextEditingController(text: _todo?.extraNote ?? "");
+    _taskController = TextEditingController(text: _todo?.task ?? "");
+    _extraNoteController = TextEditingController(text: _todo?.extraNote ?? "");
 
     _checkboxCompleted = _todo?.complete ?? false;
   }
@@ -102,7 +101,7 @@ class _CreateEditTodoScreenState extends State<CreateEditTodoScreen> {
             children: <Widget>[
               TextFormField(
                 controller: _taskController,
-                style: Theme.of(context).textTheme.body1,
+                style: Theme.of(context).textTheme.bodyText1,
                 validator: (value) => value!.isEmpty
                     ? AppLocalizations.of(context)
                         .translate("todosCreateEditTaskNameValidatorMsg")
@@ -119,7 +118,7 @@ class _CreateEditTodoScreenState extends State<CreateEditTodoScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: TextFormField(
                   controller: _extraNoteController,
-                  style: Theme.of(context).textTheme.body1,
+                  style: Theme.of(context).textTheme.bodyText1,
                   maxLines: 15,
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(

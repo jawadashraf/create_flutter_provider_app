@@ -7,7 +7,7 @@ enum Status {
   Authenticated,
   Authenticating,
   Unauthenticated,
-  Registering
+  Registering,
 }
 /*
 The UI will depends on the Status to decide which screen/action to be done.
@@ -28,8 +28,10 @@ class AuthProvider extends ChangeNotifier {
 
   //Default status
   Status _status = Status.Uninitialized;
+  // bool? _isAnonymous;
 
   Status get status => _status;
+  // bool get isAnonymous => _isAnonymous == true;
 
   Stream<UserModel> get user => _auth.authStateChanges().map(_userFromFirebase);
 
@@ -44,7 +46,7 @@ class AuthProvider extends ChangeNotifier {
   //Create user object based on the given User
   UserModel _userFromFirebase(User? user) {
     if (user == null) {
-      return UserModel(displayName: 'Null', uid: 'null');
+      return UserModel(displayName: 'No Name', uid: 'null', email: 'No email');
     }
 
     return UserModel(
@@ -52,7 +54,8 @@ class AuthProvider extends ChangeNotifier {
         email: user.email,
         displayName: user.displayName,
         phoneNumber: user.phoneNumber,
-        photoUrl: user.photoURL);
+        photoUrl: user.photoURL,
+        isAnonymous: user.isAnonymous);
   }
 
   //Method to detect live auth changes such as user sign in and sign out
@@ -62,6 +65,7 @@ class AuthProvider extends ChangeNotifier {
     } else {
       _userFromFirebase(firebaseUser);
       _status = Status.Authenticated;
+      // _isAnonymous = firebaseUser.isAnonymous;
     }
     notifyListeners();
   }
@@ -110,5 +114,19 @@ class AuthProvider extends ChangeNotifier {
     _status = Status.Unauthenticated;
     notifyListeners();
     return Future.delayed(Duration.zero);
+  }
+
+  Future<bool> signInAnonymously() async {
+    try {
+      _status = Status.Authenticating;
+      notifyListeners();
+      await _auth.signInAnonymously();
+      return true;
+    } catch (e) {
+      print("Error on the sign in = " + e.toString());
+      _status = Status.Unauthenticated;
+      notifyListeners();
+      return false;
+    }
   }
 }

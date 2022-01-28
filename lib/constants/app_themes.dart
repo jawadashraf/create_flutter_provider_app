@@ -4,6 +4,11 @@ import 'package:noteapp/constants/app_font_family.dart';
 class AppThemes {
   AppThemes._();
 
+  static const Color color3 = Color(0xFF1c1c1c);
+
+  static const Color clockColorRed = Color(0xFFFF0000);
+  static const Color clockColorGreen = Color(0xFF00FF00);
+
   //constants color range for light theme
   static const Color _lightPrimaryColor = Colors.black;
   static const Color _lightPrimaryVariantColor = Colors.white;
@@ -27,12 +32,12 @@ class AppThemes {
       fontSize: 12.0, color: _lightAppBarColor, fontWeight: FontWeight.w100);
 
   static final TextTheme _lightTextTheme = TextTheme(
-    headline: _lightScreenHeadingTextStyle,
-    body1: _lightScreenTaskNameTextStyle,
-    body2: _lightScreenTaskDurationTextStyle,
+    headline5: _lightScreenHeadingTextStyle,
+    bodyText1: _lightScreenTaskNameTextStyle,
+    bodyText2: _lightScreenTaskDurationTextStyle,
     button: _lightScreenButtonTextStyle,
-    title: _lightScreenTaskNameTextStyle,
-    subhead: _lightScreenTaskNameTextStyle,
+    headline6: _lightScreenTaskNameTextStyle,
+    subtitle1: _lightScreenTaskNameTextStyle,
     caption: _lightScreenCaptionTextStyle,
   );
 
@@ -41,10 +46,12 @@ class AppThemes {
   static const Color _darkPrimaryVariantColor = Colors.black;
   static const Color _darkSecondaryColor = Colors.white;
   static const Color _darkOnPrimaryColor = Colors.white;
-  static const Color _darkButtonPrimaryColor = Colors.deepPurpleAccent;
-  static const Color _darkAppBarColor = Colors.deepPurpleAccent;
+  static final Color _darkButtonPrimaryColor = Colors.green.shade800;
+  static const Color _darkAppBarColor = Colors.black38;
   static Color _darkIconColor = Colors.deepPurpleAccent;
   static Color _darkSnackBarBackgroundErrorColor = Colors.redAccent;
+
+  static const Color _timePickerAccentColor = Colors.orangeAccent;
 
   //text theme for dark theme
   static final TextStyle _darkScreenHeadingTextStyle =
@@ -59,12 +66,12 @@ class AppThemes {
       fontSize: 12.0, color: _darkAppBarColor, fontWeight: FontWeight.w100);
 
   static final TextTheme _darkTextTheme = TextTheme(
-    headline: _darkScreenHeadingTextStyle,
-    body1: _darkScreenTaskNameTextStyle,
-    body2: _darkScreenTaskDurationTextStyle,
+    headline5: _darkScreenHeadingTextStyle,
+    bodyText1: _darkScreenTaskNameTextStyle,
+    bodyText2: _darkScreenTaskDurationTextStyle,
     button: _darkScreenButtonTextStyle,
-    title: _darkScreenTaskNameTextStyle,
-    subhead: _darkScreenTaskNameTextStyle,
+    headline6: _darkScreenTaskNameTextStyle,
+    subtitle1: _darkScreenTaskNameTextStyle,
     caption: _darkScreenCaptionTextStyle,
   );
 
@@ -106,37 +113,85 @@ class AppThemes {
 
   //the dark theme
   static final ThemeData darkTheme = ThemeData(
-    fontFamily: AppFontFamily.productSans,
-    scaffoldBackgroundColor: _darkPrimaryVariantColor,
-    floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: _darkButtonPrimaryColor,
-    ),
-    appBarTheme: AppBarTheme(
-      color: _darkAppBarColor,
-      iconTheme: IconThemeData(color: _darkOnPrimaryColor),
+      fontFamily: AppFontFamily.productSans,
+      scaffoldBackgroundColor: _darkPrimaryVariantColor,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: _darkButtonPrimaryColor,
+      ),
+      appBarTheme: AppBarTheme(
+        color: _darkAppBarColor,
+        iconTheme: IconThemeData(color: _darkOnPrimaryColor),
+        textTheme: _darkTextTheme,
+      ),
+      colorScheme: ColorScheme.light(
+        primary: _darkPrimaryColor,
+        primaryVariant: _darkPrimaryVariantColor,
+        secondary: _darkSecondaryColor,
+        onPrimary: _darkOnPrimaryColor,
+      ),
+      errorColor: Colors.yellow,
+      snackBarTheme:
+          SnackBarThemeData(backgroundColor: _darkSnackBarBackgroundErrorColor),
+      iconTheme: IconThemeData(
+        color: _darkIconColor,
+      ),
+      popupMenuTheme: PopupMenuThemeData(color: _darkAppBarColor),
       textTheme: _darkTextTheme,
-    ),
-    colorScheme: ColorScheme.light(
-      primary: _darkPrimaryColor,
-      primaryVariant: _darkPrimaryVariantColor,
-      secondary: _darkSecondaryColor,
-      onPrimary: _darkOnPrimaryColor,
-    ),
-    snackBarTheme:
-        SnackBarThemeData(backgroundColor: _darkSnackBarBackgroundErrorColor),
-    iconTheme: IconThemeData(
-      color: _darkIconColor,
-    ),
-    popupMenuTheme: PopupMenuThemeData(color: _darkAppBarColor),
-    textTheme: _darkTextTheme,
-    buttonTheme: ButtonThemeData(
-        buttonColor: _darkButtonPrimaryColor,
-        textTheme: ButtonTextTheme.primary),
-    unselectedWidgetColor: _darkPrimaryColor,
-    inputDecorationTheme: InputDecorationTheme(
-        fillColor: _darkPrimaryColor,
-        labelStyle: TextStyle(
-          color: _darkPrimaryColor,
-        )),
-  );
+      buttonTheme: ButtonThemeData(
+          buttonColor: _darkButtonPrimaryColor,
+          textTheme: ButtonTextTheme.primary),
+      unselectedWidgetColor: _darkPrimaryColor,
+      inputDecorationTheme: InputDecorationTheme(
+          fillColor: _darkPrimaryColor,
+          labelStyle: TextStyle(
+            color: _darkPrimaryColor,
+          )),
+      timePickerTheme: TimePickerThemeData(
+        backgroundColor: Colors.blueGrey,
+        hourMinuteShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+          side: BorderSide(color: _timePickerAccentColor, width: 4),
+        ),
+        dayPeriodBorderSide:
+            const BorderSide(color: _timePickerAccentColor, width: 4),
+        // dayPeriodColor: Colors.blueGrey.shade100,
+        dayPeriodColor: MaterialStateColor.resolveWith((states) =>
+            states.contains(MaterialState.selected)
+                ? _timePickerAccentColor
+                : Colors.blueGrey.shade800),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+          side: BorderSide(color: _timePickerAccentColor, width: 4),
+        ),
+        dayPeriodTextColor: Colors.white,
+        dayPeriodShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+          side: BorderSide(color: _timePickerAccentColor, width: 4),
+        ),
+        hourMinuteColor: MaterialStateColor.resolveWith((states) =>
+            states.contains(MaterialState.selected)
+                ? _timePickerAccentColor
+                : Colors.blueGrey.shade800),
+        hourMinuteTextColor: MaterialStateColor.resolveWith((states) =>
+            states.contains(MaterialState.selected)
+                ? Colors.white
+                : _timePickerAccentColor),
+        dialHandColor: Colors.blueGrey.shade700,
+        dialBackgroundColor: Colors.blueGrey.shade800,
+        hourMinuteTextStyle:
+            const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        dayPeriodTextStyle:
+            const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        helpTextStyle: const TextStyle(
+            fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+        inputDecorationTheme: const InputDecorationTheme(
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.all(0),
+        ),
+        dialTextColor: MaterialStateColor.resolveWith((states) =>
+            states.contains(MaterialState.selected)
+                ? _timePickerAccentColor
+                : Colors.white),
+        entryModeIconColor: _timePickerAccentColor,
+      ));
 }

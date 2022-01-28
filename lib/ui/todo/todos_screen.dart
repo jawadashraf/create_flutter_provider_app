@@ -25,11 +25,7 @@ class TodosScreen extends StatelessWidget {
             stream: authProvider.user,
             builder: (context, snapshot) {
               final UserModel? user = snapshot.data as UserModel?;
-              return Text(user != null
-                  ? user.email! +
-                      " - " +
-                      AppLocalizations.of(context).translate("homeAppBarTitle")
-                  : AppLocalizations.of(context).translate("homeAppBarTitle"));
+              return Text("Hello");
             }),
         actions: <Widget>[
           StreamBuilder(

@@ -1,12 +1,16 @@
 import 'dart:async';
 
+import 'package:noteapp/models/masjid_model.dart';
 import 'package:noteapp/models/todo_model.dart';
 import 'package:noteapp/services/firestore_path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geoflutterfire/geoflutterfire.dart';
 
 import 'package:noteapp/services/firestore_service.dart';
+import 'package:uuid/uuid.dart';
 
 String documentIdFromCurrentDate() => DateTime.now().toIso8601String();
+String documentIdFromUuid() => Uuid().v1();
 
 /*
 This is the main class access/call for any UI widgets that require to perform
@@ -25,6 +29,7 @@ class FirestoreDatabase {
   final String uid;
 
   final _firestoreService = FirestoreService.instance;
+  final geo = Geoflutterfire();
 
   //Method to create/update todoModel
   Future<void> setTodo(TodoModel todo) async => await _firestoreService.set(
@@ -77,4 +82,28 @@ class FirestoreDatabase {
     }
     await batchDelete.commit();
   }
+
+//Method to create/update masjid
+  Future<void> setMasjid(Masjid masjid) async => await _firestoreService.set(
+        path: FirestorePath.masjid(masjid.id),
+        data: masjid.toMap(),
+      );
+
+  //Method to delete masjid entry
+  Future<void> deleteMasjid(Masjid masjid) async {
+    await _firestoreService.deleteData(path: FirestorePath.masjid(masjid.id));
+  }
+
+  //Method to retrieve masjid object based on the given todoId
+  Stream<Masjid> masjidStream({required String masjidId}) =>
+      _firestoreService.documentStream(
+        path: FirestorePath.masjid(masjidId),
+        builder: (data, documentId) => Masjid.fromMap(data, documentId),
+      );
+
+  //Method to retrieve all masjid item from the same user based on uid
+  Stream<List<Masjid>> masjidsStream() => _firestoreService.collectionStream(
+        path: FirestorePath.masjids(),
+        builder: (data, documentId) => Masjid.fromMap(data, documentId),
+      );
 }

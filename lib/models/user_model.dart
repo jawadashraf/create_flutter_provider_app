@@ -4,12 +4,13 @@ class UserModel {
   String? displayName;
   String? phoneNumber;
   String? photoUrl;
+  bool? isAnonymous;
 
   UserModel(
       {required this.uid,
       this.email,
       this.displayName,
       this.phoneNumber,
-      this.photoUrl});
-
+      this.photoUrl,
+      this.isAnonymous});
 }
