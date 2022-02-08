@@ -1,13 +1,21 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_place_picker/google_maps_place_picker.dart';
+import 'package:noteapp/constants/app_themes.dart';
+import 'package:noteapp/map.dart';
 import 'package:noteapp/models/masjid_model.dart';
 import 'package:noteapp/services/firestore_database.dart';
+import 'package:noteapp/ui/masjid/place_picker.dart';
 import 'package:noteapp/ui/masjid/waktuSalat.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:ui' as ui;
+
+final GeolocatorPlatform _geolocatorPlatform = GeolocatorPlatform.instance;
 
 class CreateEditMasjidScreen extends StatefulWidget {
   @override
@@ -21,6 +29,10 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   Masjid? _masjid;
 
+  late GoogleMapController mapController;
+
+  List<Marker> allMarkers = <Marker>[];
+
   String selectedEnName = "";
   String selectedUrduName = "";
 
@@ -33,6 +45,10 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
 
   TimeOfDay selectedTime = TimeOfDay.now();
   GeoFirePoint? selectedPosition;
+
+  PickResult? selectedPlace;
+
+  final kInitialPosition = LatLng(33.58757, 71.44239);
 
   bool get _hasChangedEnName => _masjid?.enName != selectedEnName;
   bool get _hasChangedUrduName => _masjid?.urduName != selectedUrduName;
@@ -61,6 +77,8 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
     super.initState();
   }
 
+  void loadData() {}
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -84,7 +102,16 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
     selectedIshaTime = _masjid?.ishaTime ?? "00:00 AM";
     selectedPosition = _masjid?.position;
 
-    print(_hasChangedValue);
+    print("Position $selectedPosition");
+
+    if (selectedPosition != null)
+      MapsUtil.getMarker(
+              latlng: LatLng(
+                  selectedPosition!.latitude, selectedPosition!.longitude))
+          .then((marker) {
+        allMarkers.add(marker);
+        setState(() {});
+      });
   }
 
   @override
@@ -157,6 +184,57 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
       return currentTimeInString;
   }
 
+  Future<bool> _handlePermission() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await _geolocatorPlatform.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      // _updatePositionList(
+      //   _PositionItemType.log,
+      //   _kLocationServicesDisabledMessage,
+      // );
+
+      return false;
+    }
+
+    permission = await _geolocatorPlatform.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await _geolocatorPlatform.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+
+        return false;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      // _updatePositionList(
+      //   _PositionItemType.log,
+      //   _kPermissionDeniedForeverMessage,
+      // );
+
+      return false;
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    // _updatePositionList(
+    //   _PositionItemType.log,
+    //   _kPermissionGrantedMessage,
+    // );
+    return true;
+  }
+
   Widget _buildForm(BuildContext context) {
     return Form(
       key: _formKey,
@@ -167,7 +245,13 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Text(selectedUrduName),
+              Container(
+                decoration: AppThemes.myLeftBoxDecoration(),
+                child: Text(
+                  selectedEnName,
+                  style: TextStyle(fontSize: 24.0),
+                ).center().onTap(() => _displayEngnameDialog(context)),
+              ),
               16.height,
               // TextFormField(
               //   controller: _enNameController,
@@ -181,7 +265,12 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
               //     labelText: "English Name",
               //   ),
               // ),
-              Text(selectedUrduName),
+              Container(
+                decoration: AppThemes.myRightBoxDecoration(),
+                child: Text(selectedUrduName, style: TextStyle(fontSize: 24.0))
+                    .center()
+                    .onTap(() => _displayUrdunameDialog(context)),
+              ),
               // Padding(
               //   padding: const EdgeInsets.symmetric(vertical: 16),
               //   child: TextFormField(
@@ -275,11 +364,227 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
                   selectedJummahTime = str;
                 });
               }),
+              24.height,
+              Container(
+                height: 200,
+                width: 100,
+                child: (selectedPosition == null)
+                    ? Container()
+                    : GoogleMap(
+                        compassEnabled: false,
+                        scrollGesturesEnabled: true,
+                        tiltGesturesEnabled: false,
+                        myLocationEnabled: false,
+                        myLocationButtonEnabled: false,
+                        zoomControlsEnabled: false,
+                        zoomGesturesEnabled: true,
+                        mapToolbarEnabled: false,
+                        rotateGesturesEnabled: false,
+                        liteModeEnabled: false,
+                        mapType: MapType.normal,
+                        initialCameraPosition: CameraPosition(
+                            target: LatLng(selectedPosition!.latitude,
+                                selectedPosition!.longitude),
+                            zoom: 17),
+                        markers: Set.from(allMarkers),
+                        onMapCreated: (GoogleMapController _con) {
+                          mapController = _con;
+                        },
+                      ),
+              ).paddingAll(8),
+              16.height,
+              ElevatedButton(
+                  onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return PlacePicker(
+                              apiKey: AppThemes.googleMapApiKey,
+                              initialPosition: selectedPosition == null
+                                  ? kInitialPosition
+                                  : new LatLng(selectedPosition!.latitude,
+                                      selectedPosition!.longitude),
+                              useCurrentLocation: false,
+                              selectInitialPosition: true,
+
+                              //usePlaceDetailSearch: true,
+                              onPlacePicked: (result) {
+                                selectedPlace = result;
+                                Navigator.of(context).pop();
+                                setState(() {
+                                  print(
+                                      "${selectedPlace!.geometry!.location.lat}  ${selectedPlace!.geometry!.location.lng}");
+                                  selectedPosition = new GeoFirePoint(
+                                      selectedPlace!.geometry!.location.lat,
+                                      selectedPlace!.geometry!.location.lng);
+                                  LatLng newlatlang = LatLng(
+                                      selectedPlace!.geometry!.location.lat,
+                                      selectedPlace!.geometry!.location.lng);
+
+                                  MapsUtil.getMarker(
+                                          latlng: LatLng(
+                                              selectedPosition!.latitude,
+                                              selectedPosition!.longitude))
+                                      .then((marker) {
+                                    allMarkers = [];
+                                    allMarkers.add(marker);
+                                    setState(() {});
+                                  });
+
+                                  mapController.animateCamera(
+                                      CameraUpdate.newCameraPosition(
+                                          CameraPosition(
+                                              target: newlatlang, zoom: 17)
+                                          //17 is new zoom level
+                                          ));
+                                });
+                              },
+                              //forceSearchOnZoomChanged: true,
+                              //automaticallyImplyAppBarLeading: false,
+                              //autocompleteLanguage: "ko",
+                              //region: 'au',
+                              //selectInitialPosition: true,
+                              // selectedPlaceWidgetBuilder: (_, selectedPlace, state, isSearchBarFocused) {
+                              //   print("state: $state, isSearchBarFocused: $isSearchBarFocused");
+                              //   return isSearchBarFocused
+                              //       ? Container()
+                              //       : FloatingCard(
+                              //           bottomPosition: 0.0, // MediaQuery.of(context) will cause rebuild. See MediaQuery document for the information.
+                              //           leftPosition: 0.0,
+                              //           rightPosition: 0.0,
+                              //           width: 500,
+                              //           borderRadius: BorderRadius.circular(12.0),
+                              //           child: state == SearchingState.Searching
+                              //               ? Center(child: CircularProgressIndicator())
+                              //               : RaisedButton(
+                              //                   child: Text("Pick Here"),
+                              //                   onPressed: () {
+                              //                     // IMPORTANT: You MUST manage selectedPlace data yourself as using this build will not invoke onPlacePicker as
+                              //                     //            this will override default 'Select here' Button.
+                              //                     print("do something with [selectedPlace] data");
+                              //                     Navigator.of(context).pop();
+                              //                   },
+                              //                 ),
+                              //         );
+                              // },
+                              pinBuilder: (context, state) {
+                                if (state == PinState.Idle) {
+                                  return Icon(
+                                    Icons.pin_drop_outlined,
+                                    size: 36,
+                                  );
+                                } else {
+                                  return Icon(Icons.pin_drop);
+                                }
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                  child: Text('Change Location'))
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _displayEngnameDialog(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Colors.grey.shade900,
+            // title: Text('English Name'),
+            content: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: TextFormField(
+                onChanged: (value) {
+                  setState(() {
+                    selectedEnName = value;
+                  });
+                },
+                maxLines: 3,
+                controller: _enNameController,
+                style: Theme.of(context).textTheme.bodyText1,
+                validator: (value) =>
+                    value!.isEmpty ? "English name can't be empty" : null,
+                // maxLines: 15,
+                decoration: InputDecoration(
+                  enabledBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Colors.orangeAccent, width: 2)),
+                  labelText: "English Name",
+                  alignLabelWithHint: true,
+                  contentPadding: new EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: 10.0),
+                ),
+              ),
+            ),
+            actions: <Widget>[
+              ElevatedButton(
+                style: AppThemes.raisedButtonStyle,
+                child: Text('OK'),
+                onPressed: () {
+                  setState(() {
+                    Navigator.pop(context);
+                  });
+                },
+              ),
+            ],
+          );
+        });
+  }
+
+  Future<void> _displayUrdunameDialog(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Colors.grey.shade900,
+            // title: Text('English Name'),
+            content: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Directionality(
+                textDirection: ui.TextDirection.rtl,
+                child: TextFormField(
+                  textAlign: TextAlign.right,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedUrduName = value;
+                    });
+                  },
+                  maxLines: 3,
+                  controller: _urduNameController,
+                  style: Theme.of(context).textTheme.bodyText1,
+                  validator: (value) =>
+                      value!.isEmpty ? "Urdu name can't be empty" : null,
+                  // maxLines: 15,
+                  decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: Colors.orangeAccent, width: 2)),
+                    labelText: "اردو نام",
+                    alignLabelWithHint: true,
+                    contentPadding: new EdgeInsets.symmetric(
+                        vertical: 10.0, horizontal: 10.0),
+                  ),
+                ),
+              ),
+            ),
+            actions: <Widget>[
+              ElevatedButton(
+                style: AppThemes.raisedButtonStyle,
+                child: Text('OK'),
+                onPressed: () {
+                  setState(() {
+                    Navigator.pop(context);
+                  });
+                },
+              ),
+            ],
+          );
+        });
   }
 }
 

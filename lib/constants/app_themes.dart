@@ -45,10 +45,10 @@ class AppThemes {
   static const Color _darkPrimaryColor = Colors.white;
   static const Color _darkPrimaryVariantColor = Colors.black;
   static const Color _darkSecondaryColor = Colors.white;
-  static const Color _darkOnPrimaryColor = Colors.white;
+  static const Color _darkOnPrimaryColor = Colors.grey;
   static final Color _darkButtonPrimaryColor = Colors.green.shade800;
   static const Color _darkAppBarColor = Colors.black38;
-  static Color _darkIconColor = Colors.deepPurpleAccent;
+  static Color _darkIconColor = Colors.green.shade800;
   static Color _darkSnackBarBackgroundErrorColor = Colors.redAccent;
 
   static const Color _timePickerAccentColor = Colors.orangeAccent;
@@ -74,6 +74,50 @@ class AppThemes {
     subtitle1: _darkScreenTaskNameTextStyle,
     caption: _darkScreenCaptionTextStyle,
   );
+
+  static final ButtonStyle raisedButtonStyle = ElevatedButton.styleFrom(
+    onPrimary: Colors.black87,
+    primary: _darkButtonPrimaryColor,
+    minimumSize: Size(88, 36),
+    padding: EdgeInsets.symmetric(horizontal: 16),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(2)),
+    ),
+  );
+
+  static BoxDecoration myLeftBoxDecoration() {
+    return BoxDecoration(
+      border: Border(
+        left: BorderSide(
+          //                   <--- left side
+          color: Colors.orangeAccent,
+          width: 1.0,
+        ),
+        top: BorderSide(
+          //                    <--- top side
+          color: Colors.orangeAccent,
+          width: 1.0,
+        ),
+      ),
+    );
+  }
+
+  static BoxDecoration myRightBoxDecoration() {
+    return BoxDecoration(
+      border: Border(
+        right: BorderSide(
+          //                   <--- left side
+          color: Colors.orangeAccent,
+          width: 1.0,
+        ),
+        bottom: BorderSide(
+          //                    <--- top side
+          color: Colors.orangeAccent,
+          width: 1.0,
+        ),
+      ),
+    );
+  }
 
   //the light theme
   static final ThemeData lightTheme = ThemeData(
@@ -113,6 +157,7 @@ class AppThemes {
 
   //the dark theme
   static final ThemeData darkTheme = ThemeData(
+      cardColor: Colors.black54,
       fontFamily: AppFontFamily.productSans,
       scaffoldBackgroundColor: _darkPrimaryVariantColor,
       floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -140,6 +185,7 @@ class AppThemes {
       buttonTheme: ButtonThemeData(
           buttonColor: _darkButtonPrimaryColor,
           textTheme: ButtonTextTheme.primary),
+      elevatedButtonTheme: ElevatedButtonThemeData(style: raisedButtonStyle),
       unselectedWidgetColor: _darkPrimaryColor,
       inputDecorationTheme: InputDecorationTheme(
           fillColor: _darkPrimaryColor,
@@ -194,4 +240,14 @@ class AppThemes {
                 : Colors.white),
         entryModeIconColor: _timePickerAccentColor,
       ));
+
+  static const String _kLocationServicesDisabledMessage =
+      'Location services are disabled.';
+  static const String _kPermissionDeniedMessage = 'Permission denied.';
+  static const String _kPermissionDeniedForeverMessage =
+      'Permission denied forever.';
+  static const String _kPermissionGrantedMessage = 'Permission granted.';
+
+  static const String googleMapApiKey =
+      'AIzaSyBd6F8oIHxOePYHPWlUo-duwtmu-E96__8';
 }

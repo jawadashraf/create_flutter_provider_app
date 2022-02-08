@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:noteapp/models/masjid_model.dart';
 import 'package:noteapp/models/todo_model.dart';
+import 'package:noteapp/models/user_model.dart';
 import 'package:noteapp/services/firestore_path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
@@ -40,6 +41,17 @@ class FirestoreDatabase {
   //Method to delete todoModel entry
   Future<void> deleteTodo(TodoModel todo) async {
     await _firestoreService.deleteData(path: FirestorePath.todo(uid, todo.id));
+  }
+
+  Future<void> setMyMasjid(String masjidId) async =>
+      await _firestoreService.set(
+        path: FirestorePath.myMasjid(uid, masjidId),
+        data: {"masjidId": masjidId},
+      );
+
+  Future<void> removeMyMasjid(Masjid masjid) async {
+    await _firestoreService.deleteData(
+        path: FirestorePath.myMasjid(uid, masjid.id));
   }
 
   //Method to retrieve todoModel object based on the given todoId
@@ -106,4 +118,68 @@ class FirestoreDatabase {
         path: FirestorePath.masjids(),
         builder: (data, documentId) => Masjid.fromMap(data, documentId),
       );
+
+  // Stream<UserModel> userMasjidsStream() => _firestoreService.documentStream(
+  //       path: FirestorePath.user(uid),
+  //       builder: (data, documentId) => UserModel.fromMap(data, documentId),
+  //     );
+
+  Stream<List<Masjid>> myMasjidsStream(List<String>? masjidIds) {
+    print(uid);
+
+    // print(masjidIds);
+    // masjidIds = snapshots.map((snapshot) {
+    //   List<String> ids = [];
+    //   snapshot.map((e) {
+    //     print(e.id);
+    //     ids.add(e.id);
+    //   });
+    //   return ids;
+    //   // return snapshot;
+    // });
+
+    // Stream<List<Masjid>> snapshots = _firestoreService.collectionStream(
+    //   path: FirestorePath.myMasjids(uid),
+    //   builder: (data, documentId) => Masjid.fromMap(data, documentId),
+    // );
+
+    // List<String> masjidIds = [];
+
+    // snapshots.listen((masjids) {
+    //   for (Masjid masjid in masjids) {
+    //     masjidIds.add(masjid.id);
+    //   }
+    // });
+
+    return _firestoreService.collectionStream(
+      path: FirestorePath.masjids(),
+      builder: (data, documentId) => Masjid.fromMap(data, documentId),
+      queryBuilder: (query) {
+        // return query.where(FieldPath.documentId, whereIn: masjidIds);
+        return masjidIds == null || masjidIds.isEmpty
+            ? query.where(FieldPath.documentId, isEqualTo: "jibberish")
+            : query.where(FieldPath.documentId, whereIn: masjidIds);
+      },
+    );
+  }
+
+  Future<List<String>> getMyMasjidIds() async {
+    Stream<List<Masjid>> snapshots = _firestoreService.collectionStream(
+      path: FirestorePath.myMasjids(uid),
+      builder: (data, documentId) => Masjid.fromMap(data, documentId),
+    );
+
+    List<String> masjidIds = [];
+
+    snapshots.listen((masjids) {
+      for (Masjid masjid in masjids) {
+        masjidIds.add(masjid.id);
+      }
+    }).onDone(() {
+      //run here
+    });
+
+    print(masjidIds);
+    return masjidIds;
+  }
 }

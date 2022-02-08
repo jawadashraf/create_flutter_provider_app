@@ -20,14 +20,16 @@ class WaktuSalat extends StatelessWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
-              Text(
+              GlowText(
                 time,
+                blurRadius: 10,
                 style: TextStyle(
                     color: isCurrent
                         ? AppThemes.clockColorGreen
                         : AppThemes.clockColorRed,
                     fontWeight: FontWeight.normal,
-                    fontSize: 28),
+                    fontFamily: AppFontFamily.digital,
+                    fontSize: 32),
               ),
               // SizedBox(
               //   width: 10,
@@ -43,15 +45,15 @@ class WaktuSalat extends StatelessWidget {
           //       fontWeight: FontWeight.normal,
           //       fontSize: 28),
           // ),
-          GlowText(
+          Text(
             name,
-            blurRadius: 10,
             style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 28,
-                color: isCurrent
-                    ? AppThemes.clockColorGreen
-                    : AppThemes.clockColorRed),
+              fontWeight: FontWeight.bold,
+              fontSize: 28,
+              // color: isCurrent
+              //     ? AppThemes.clockColorGreen
+              //     : AppThemes.clockColorRed,
+            ),
           )
         ],
       ),

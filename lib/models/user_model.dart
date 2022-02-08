@@ -1,3 +1,5 @@
+import 'package:noteapp/models/masjid_model.dart';
+
 class UserModel {
   String uid;
   String? email;
@@ -5,6 +7,7 @@ class UserModel {
   String? phoneNumber;
   String? photoUrl;
   bool? isAnonymous;
+  List<Masjid>? myMasjids;
 
   UserModel(
       {required this.uid,
@@ -12,5 +15,6 @@ class UserModel {
       this.displayName,
       this.phoneNumber,
       this.photoUrl,
-      this.isAnonymous});
+      this.isAnonymous,
+      this.myMasjids});
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:noteapp/ui/auth/register_screen.dart';
 import 'package:noteapp/ui/auth/sign_in_screen.dart';
+import 'package:noteapp/ui/home/geo_locator.dart';
 import 'package:noteapp/ui/masjid/create_edit_masjid_screen.dart';
 import 'package:noteapp/ui/masjid/masjids_screen.dart';
 import 'package:noteapp/ui/masjid/salah_times_screen.dart';
@@ -20,6 +21,7 @@ class Routes {
   static const String create_edit_todo = '/create_edit_todo';
   static const String create_edit_masjid = '/create_edit_masjid';
   static const String salah_times = '/salah_times';
+  static const String geo_locator = '/geo_locator';
 
   static final routes = <String, WidgetBuilder>{
     splash: (BuildContext context) => SplashScreen(),
@@ -31,5 +33,6 @@ class Routes {
     create_edit_masjid: (BuildContext context) => CreateEditMasjidScreen(),
     salah_times: (BuildContext context) =>
         SalahTimesScreen(title: 'Prayer Times'),
+    geo_locator: (BuildContext context) => GeolocatorWidget(),
   };
 }
