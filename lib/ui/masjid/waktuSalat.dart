@@ -66,8 +66,13 @@ class SalatEntryTime extends StatelessWidget {
   final urdu_name;
   final time;
   final isCurrent;
+  final showEnglishName;
   SalatEntryTime(
-      {this.name, this.time, this.isCurrent = false, this.urdu_name});
+      {this.name,
+      this.time,
+      this.isCurrent = false,
+      this.urdu_name,
+      this.showEnglishName = true});
 
   @override
   Widget build(BuildContext context) {
@@ -80,12 +85,15 @@ class SalatEntryTime extends StatelessWidget {
         // crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Expanded(
-            child: Text(
-              name,
-              style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18),
-            ),
-          ),
+          !showEnglishName
+              ? Container()
+              : Expanded(
+                  child: Text(
+                    name,
+                    style:
+                        TextStyle(fontWeight: FontWeight.normal, fontSize: 18),
+                  ),
+                ),
           Expanded(
             child: Text(
               time,
@@ -100,13 +108,16 @@ class SalatEntryTime extends StatelessWidget {
                       : AppThemes.clockColorRed),
             ),
           ),
-          Expanded(
-            child: Text(
-              urdu_name,
-              textAlign: TextAlign.right,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-          )
+          showEnglishName
+              ? Container()
+              : Expanded(
+                  child: Text(
+                    urdu_name,
+                    textAlign: TextAlign.right,
+                    style:
+                        TextStyle(fontWeight: FontWeight.normal, fontSize: 18),
+                  ),
+                )
         ],
       ),
     );

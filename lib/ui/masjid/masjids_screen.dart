@@ -85,8 +85,12 @@ class _MasjidsScreenState extends State<MasjidsScreen> {
                         ? "No Email"
                         : user!.email!),
                     decoration: BoxDecoration(
-                      color: Colors.black87,
-                    ),
+                        color: Colors.black87,
+                        image: DecorationImage(
+                            image: AssetImage("assets/img/ramadan.png"),
+                            scale: 0.5,
+                            opacity: 0.5,
+                            fit: BoxFit.cover)),
                     // child: Text('Drawer Header'),
                   );
                 }),
@@ -236,7 +240,7 @@ class _MasjidsScreenState extends State<MasjidsScreen> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text("My Masjid"),
+        title: Text("My Masjids"),
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),

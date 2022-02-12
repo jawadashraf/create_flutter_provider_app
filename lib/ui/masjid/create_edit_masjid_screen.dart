@@ -7,13 +7,14 @@ import 'package:noteapp/constants/app_themes.dart';
 import 'package:noteapp/map.dart';
 import 'package:noteapp/models/masjid_model.dart';
 import 'package:noteapp/services/firestore_database.dart';
-import 'package:noteapp/ui/masjid/place_picker.dart';
 import 'package:noteapp/ui/masjid/waktuSalat.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:ui' as ui;
+
+import 'package:marquee/marquee.dart' as Marquee;
 
 final GeolocatorPlatform _geolocatorPlatform = GeolocatorPlatform.instance;
 
@@ -248,11 +249,11 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
               Container(
                 decoration: AppThemes.myLeftBoxDecoration(),
                 child: Text(
-                  selectedEnName,
+                  selectedEnName.isEmpty ? "English Name" : selectedEnName,
                   style: TextStyle(fontSize: 24.0),
                 ).center().onTap(() => _displayEngnameDialog(context)),
               ),
-              16.height,
+              24.height,
               // TextFormField(
               //   controller: _enNameController,
               //   style: Theme.of(context).textTheme.bodyText1,
@@ -267,30 +268,52 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
               // ),
               Container(
                 decoration: AppThemes.myRightBoxDecoration(),
-                child: Text(selectedUrduName, style: TextStyle(fontSize: 24.0))
+                child: Text(
+                        selectedUrduName.isEmpty
+                            ? "Urdu Name"
+                            : selectedUrduName,
+                        style: TextStyle(fontSize: 24.0))
                     .center()
                     .onTap(() => _displayUrdunameDialog(context)),
               ),
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(vertical: 16),
-              //   child: TextFormField(
-              //     controller: _urduNameController,
-              //     style: Theme.of(context).textTheme.bodyText1,
-              //     validator: (value) =>
-              //         value!.isEmpty ? "Urdu name can't be empty" : null,
-              //     // maxLines: 15,
-              //     decoration: InputDecoration(
-              //       enabledBorder: OutlineInputBorder(
-              //           borderSide: BorderSide(
-              //               color: Theme.of(context).iconTheme.color!,
-              //               width: 2)),
-              //       labelText: "Urdu Name",
-              //       alignLabelWithHint: true,
-              //       contentPadding: new EdgeInsets.symmetric(
-              //           vertical: 10.0, horizontal: 10.0),
-              //     ),
-              //   ),
-              // ),
+              36.height,
+              _masjid == null
+                  ? Container()
+                  : Container(
+                      padding: const EdgeInsets.all(8.0),
+                      constraints: BoxConstraints(
+                          minHeight: 60,
+                          minWidth: double.infinity,
+                          maxHeight: 60),
+                      child: Marquee.Marquee(
+                        text:
+                            'لآ اِلَهَ اِلّا اللّهُ مُحَمَّدٌ رَسُوُل اللّه  - لآ اِلَهَ اِلّا اللّهُ مُحَمَّدٌ رَسُوُل اللّهِ - لآ اِلَهَ اِلّا اللّهُ مُحَمَّدٌ رَسُوُل اللّهِ',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Colors.green,
+                            backgroundColor: Colors.black),
+                        scrollAxis: Axis.horizontal,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        blankSpace: 20.0,
+                        velocity: 100.0,
+                        pauseAfterRound: Duration(seconds: 1),
+                        startPadding: 10.0,
+                        accelerationDuration: Duration(seconds: 1),
+                        accelerationCurve: Curves.linear,
+                        decelerationDuration: Duration(milliseconds: 500),
+                        decelerationCurve: Curves.easeOut,
+                        textDirection: ui.TextDirection.rtl,
+                      ),
+                      // child: Marquee(
+                      //   direction: Axis.horizontal,
+                      //   animationDuration: Duration(milliseconds: 100),
+                      //   pauseDuration: Duration(milliseconds: 100),
+                      //   child: Text(
+                      //       "لآ اِلَهَ اِلّا اللّهُ مُحَمَّدٌ رَسُوُل اللّه  - لآ اِلَهَ اِلّا اللّهُ مُحَمَّدٌ رَسُوُل اللّهِ - لآ اِلَهَ اِلّا اللّهُ مُحَمَّدٌ رَسُوُل اللّه"),
+                      // ),
+                    ),
+
               16.height,
               WaktuSalat(
                 name: "الفجر",
@@ -365,12 +388,12 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
                 });
               }),
               24.height,
-              Container(
-                height: 200,
-                width: 100,
-                child: (selectedPosition == null)
-                    ? Container()
-                    : GoogleMap(
+              (selectedPosition == null)
+                  ? Container()
+                  : Container(
+                      height: 200,
+                      width: 100,
+                      child: GoogleMap(
                         compassEnabled: false,
                         scrollGesturesEnabled: true,
                         tiltGesturesEnabled: false,
@@ -391,7 +414,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
                           mapController = _con;
                         },
                       ),
-              ).paddingAll(8),
+                    ).paddingAll(8),
               16.height,
               ElevatedButton(
                   onPressed: () => Navigator.push(
@@ -481,7 +504,9 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
                           },
                         ),
                       ),
-                  child: Text('Change Location'))
+                  child: Text(selectedPosition != null
+                      ? 'Change Location'
+                      : 'Add Location'))
             ],
           ),
         ),
@@ -515,6 +540,8 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
                       borderSide:
                           BorderSide(color: Colors.orangeAccent, width: 2)),
                   labelText: "English Name",
+                  hintText: "English Name",
+                  hintStyle: TextStyle(color: Colors.grey),
                   alignLabelWithHint: true,
                   contentPadding: new EdgeInsets.symmetric(
                       vertical: 10.0, horizontal: 10.0),

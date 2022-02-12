@@ -4,13 +4,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:noteapp/constants/app_themes.dart';
 import 'package:noteapp/models/pin_information.dart';
 import 'package:noteapp/ui/masjid/main_pin_pill.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 import '../../map.dart';
+
+import 'package:nb_utils/nb_utils.dart';
+
+final GeolocatorPlatform _geolocatorPlatform = GeolocatorPlatform.instance;
 
 // import 'streambuilder_test.dart';
 
@@ -46,28 +52,40 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
       urduName: '',
       id: '');
 
+  Position? currentPosition;
+
+  String locationMessage = "";
+
+  bool loading = false;
+
   @override
   void initState() {
     super.initState();
+    loadData();
+  }
 
-    geo = Geoflutterfire();
-    GeoFirePoint center = geo.point(latitude: 33.58757, longitude: 71.44239);
-    stream = radius.switchMap((rad) {
-      final collectionReference = _firestore.collection('masjids');
+  loadData() async {
+    loading = true;
 
-      return geo.collection(collectionRef: collectionReference).within(
-          center: center, radius: rad, field: 'position', strictMode: true);
+    await _getCurrentPosition();
 
-      /*
-      ****Example to specify nested object****
-      var collectionReference = _firestore.collection('nestedLocations');
-//          .where('name', isEqualTo: 'darshan');
-      return geo.collection(collectionRef: collectionReference).within(
-          center: center, radius: rad, field: 'address.location.position');
-      */
+    setState(() {
+      loading = false;
     });
+    if (currentPosition != null) geo = Geoflutterfire();
+    {
+      GeoFirePoint center = geo.point(
+          latitude: currentPosition!.latitude,
+          longitude: currentPosition!.longitude);
+      stream = radius.switchMap((rad) {
+        final collectionReference = _firestore.collection('masjids');
 
-    _loadMapStyles();
+        return geo.collection(collectionRef: collectionReference).within(
+            center: center, radius: rad, field: 'position', strictMode: true);
+      });
+
+      _loadMapStyles();
+    }
   }
 
   Future _loadMapStyles() async {
@@ -78,6 +96,54 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
 
   Future _setMapStyle() async {
     _mapController!.setMapStyle(_darkMapStyle);
+  }
+
+  Future<void> _getCurrentPosition() async {
+    final hasPermission = await _handlePermission();
+
+    if (!hasPermission) {
+      return;
+    }
+
+    final position = await _geolocatorPlatform.getCurrentPosition();
+    setState(() {
+      currentPosition = position;
+    });
+  }
+
+  Future<bool> _handlePermission() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await _geolocatorPlatform.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      setState(() {
+        locationMessage = AppThemes.kLocationServicesDisabledMessage;
+      });
+      return false;
+    }
+
+    permission = await _geolocatorPlatform.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await _geolocatorPlatform.requestPermission();
+      if (permission == LocationPermission.denied) {
+        setState(() {
+          locationMessage = AppThemes.kPermissionDeniedMessage;
+        });
+
+        return false;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      setState(() {
+        locationMessage = AppThemes.kPermissionDeniedForeverMessage;
+      });
+      return false;
+    }
+
+    return true;
   }
 
   @override
@@ -109,62 +175,74 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
       //   },
       //   child: Icon(Icons.navigate_next),
       // ),
-      body: Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Center(
-              child: Card(
-                elevation: 4,
-                margin: EdgeInsets.symmetric(vertical: 8),
-                child: SizedBox(
-                  width: mediaQuery.size.width - 30,
-                  height: mediaQuery.size.height * (7 / 10),
-                  child: Stack(children: [
-                    GoogleMap(
-                      onMapCreated: _onMapCreated,
-                      initialCameraPosition: CameraPosition(
-                        target: cameraCenter,
-                        zoom: 11.0,
+      body: loading
+          ? Center(child: CircularProgressIndicator())
+          : currentPosition == null
+              ? Column(
+                  children: [
+                    Text(locationMessage),
+                    ElevatedButton(
+                        onPressed: () => loadData(), child: Text("Try Again"))
+                  ],
+                )
+              : Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Center(
+                        child: Card(
+                          elevation: 4,
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          child: SizedBox(
+                            width: mediaQuery.size.width - 30,
+                            height: mediaQuery.size.height * (7 / 10),
+                            child: Stack(children: [
+                              GoogleMap(
+                                onMapCreated: _onMapCreated,
+                                initialCameraPosition: CameraPosition(
+                                  target: cameraCenter,
+                                  zoom: 11.0,
+                                ),
+                                markers: Set<Marker>.of(markers.values),
+                                onTap: (LatLng location) {
+                                  setState(() {
+                                    pinPillPosition = -200;
+                                  });
+                                },
+                              ),
+                              MapPinPillComponent(
+                                  pinPillPosition: pinPillPosition,
+                                  currentlySelectedPin: currentlySelectedPin)
+                            ]),
+                          ),
+                        ),
                       ),
-                      markers: Set<Marker>.of(markers.values),
-                      onTap: (LatLng location) {
-                        setState(() {
-                          pinPillPosition = -200;
-                        });
-                      },
-                    ),
-                    MapPinPillComponent(
-                        pinPillPosition: pinPillPosition,
-                        currentlySelectedPin: currentlySelectedPin)
-                  ]),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12.0),
+                        child: Slider(
+                          min: 1,
+                          max: 100,
+                          divisions: 10,
+                          value: _value,
+                          label: _label,
+                          activeColor: Colors.blue,
+                          inactiveColor: Colors.blue.withOpacity(0.2),
+                          onChanged: (double value) => changed(value),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Container(
+                            child: Text('Within ${_value.floor()} KM'),
+                          ),
+                          Spacer(),
+                          Text("${markers.length} Masjids found")
+                        ],
+                      ).paddingAll(16),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 12.0),
-              child: Slider(
-                min: 1,
-                max: 100,
-                divisions: 10,
-                value: _value,
-                label: _label,
-                activeColor: Colors.blue,
-                inactiveColor: Colors.blue.withOpacity(0.2),
-                onChanged: (double value) => changed(value),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Container(
-                  child: Text('Within ${_value.floor()} KM'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
     );
   }
 

@@ -25,14 +25,19 @@ class _SplashScreenState extends State<SplashScreen> {
       children: <Widget>[
         Center(
             child: Text(
-          AppLocalizations.of(context).translate("splashTitle"),
+          "My Masjids",
           style: TextStyle(
-            fontSize: Theme.of(context).textTheme.headline5!.fontSize,
-          ),
+              fontSize: Theme.of(context).textTheme.headline5!.fontSize,
+              // color: Color(0xff123456),
+              color: Colors.amberAccent.shade200),
         )),
-        FlutterLogo(
-          size: 128,
+        SizedBox(
+          height: 40,
         ),
+        // FlutterLogo(
+        //   size: 128,
+        // ),
+        Image.asset('assets/img/ramadan.png', width: 128, fit: BoxFit.cover)
       ],
     )));
   }

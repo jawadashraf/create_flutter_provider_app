@@ -4,6 +4,16 @@ import 'package:noteapp/constants/app_font_family.dart';
 class AppThemes {
   AppThemes._();
 
+  static const String kLocationServicesDisabledMessage =
+      'Location services are disabled.';
+  static const String kPermissionDeniedMessage = 'Permission denied.';
+  static const String kPermissionDeniedForeverMessage =
+      'Permission denied forever.';
+  static const String kPermissionGrantedMessage = 'Permission granted.';
+
+  static const String googleMapApiKey =
+      'AIzaSyBd6F8oIHxOePYHPWlUo-duwtmu-E96__8';
+
   static const Color color3 = Color(0xFF1c1c1c);
 
   static const Color clockColorRed = Color(0xFFFF0000);
@@ -240,14 +250,4 @@ class AppThemes {
                 : Colors.white),
         entryModeIconColor: _timePickerAccentColor,
       ));
-
-  static const String _kLocationServicesDisabledMessage =
-      'Location services are disabled.';
-  static const String _kPermissionDeniedMessage = 'Permission denied.';
-  static const String _kPermissionDeniedForeverMessage =
-      'Permission denied forever.';
-  static const String _kPermissionGrantedMessage = 'Permission granted.';
-
-  static const String googleMapApiKey =
-      'AIzaSyBd6F8oIHxOePYHPWlUo-duwtmu-E96__8';
 }
