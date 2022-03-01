@@ -42,6 +42,8 @@ class _SalahTimesScreenState extends State<SalahTimesScreen> {
   bool loading = false;
   bool loadingPrayers = false;
 
+  bool hanfiCalculation = true;
+
   bool showEnglishName = true;
   @override
   void initState() {
@@ -56,16 +58,19 @@ class _SalahTimesScreenState extends State<SalahTimesScreen> {
       loadingPrayers = true;
     });
     await _getCurrentPosition();
+    var nyParams = CalculationMethod.karachi.getParameters();
 
     setState(() {
       loading = false;
 
       if (currentPosition != null)
-        prayerTimes = PrayerTimes(
-            // Coordinates(33.5834, 71.4332),
-            Coordinates(currentPosition!.latitude, currentPosition!.longitude),
-            DateComponents.from(DateTime.now()),
-            CalculationMethod.karachi.getParameters());
+        nyParams.madhab = hanfiCalculation ? Madhab.hanafi : Madhab.shafi;
+
+      prayerTimes = PrayerTimes(
+          // Coordinates(33.5834, 71.4332),
+          Coordinates(currentPosition!.latitude, currentPosition!.longitude),
+          DateComponents.from(DateTime.now()),
+          nyParams);
 
       loadingPrayers = false;
     });
@@ -277,6 +282,23 @@ class _SalahTimesScreenState extends State<SalahTimesScreen> {
                                       onToggle: (val) {
                                         setState(() {
                                           showEnglishName = val;
+                                        });
+                                      },
+                                    ),
+
+                                    64.height,
+                                    FlutterSwitch(
+                                      activeText: "Hanfi",
+                                      inactiveText: "Shafi",
+                                      value: hanfiCalculation,
+                                      valueFontSize: 24.0,
+                                      width: 220,
+                                      borderRadius: 30.0,
+                                      showOnOff: true,
+                                      onToggle: (val) {
+                                        setState(() {
+                                          hanfiCalculation = val;
+                                          loadData();
                                         });
                                       },
                                     ),

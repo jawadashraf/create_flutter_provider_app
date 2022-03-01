@@ -182,4 +182,14 @@ class FirestoreDatabase {
     print(masjidIds);
     return masjidIds;
   }
+
+  Stream<List<Masjid>> masjidsCreatedByMeStream() {
+    return _firestoreService.collectionStream(
+      path: FirestorePath.masjids(),
+      builder: (data, documentId) => Masjid.fromMap(data, documentId),
+      queryBuilder: (query) {
+        return query.where("createdBy", isEqualTo: uid);
+      },
+    );
+  }
 }

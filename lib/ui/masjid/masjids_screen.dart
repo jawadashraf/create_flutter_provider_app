@@ -1,24 +1,19 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:noteapp/app_localizations.dart';
-import 'package:noteapp/constants/app_themes.dart';
 import 'package:noteapp/models/masjid_model.dart';
-import 'package:noteapp/models/todo_model.dart';
 import 'package:noteapp/models/user_model.dart';
 import 'package:noteapp/providers/auth_provider.dart';
 import 'package:noteapp/routes.dart';
 import 'package:noteapp/services/firestore_database.dart';
-import 'package:noteapp/ui/home/geo_locator.dart';
 import 'package:noteapp/ui/masjid/masjid_list_item.dart';
+import 'package:noteapp/ui/masjid/masjids_created_by_me_screen.dart';
 import 'package:noteapp/ui/masjid/nearby_masjids.dart';
 import 'package:noteapp/ui/masjid/salah_times_screen.dart';
 import 'package:noteapp/ui/qiblah/qiblah_main.dart';
 import 'package:noteapp/ui/todo/empty_content.dart';
-import 'package:noteapp/ui/masjid/masjids_extra_actions.dart';
 import 'package:provider/provider.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -128,6 +123,23 @@ class _MasjidsScreenState extends State<MasjidsScreen> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.apartment),
+              title: const Text(
+                'Masjids Entered By Me',
+                style: TextStyle(fontSize: 18.0, color: Colors.black87),
+              ),
+              onTap: () {
+                finish(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<bool>(
+                    builder: (BuildContext context) =>
+                        MasjidsCreatedByMeScreen(),
+                  ),
+                ).then(onGoBack);
+              },
+            ),
+            ListTile(
               leading: const FaIcon(FontAwesomeIcons.compass),
               title: const Text(
                 'Qibla Direction',
@@ -197,8 +209,8 @@ class _MasjidsScreenState extends State<MasjidsScreen> {
                         }
                         await setValue("myMasjids", myMasjids);
 
-                        await firestoreDatabase.removeMyMasjid(masjids[index]);
                         masjids.removeAt(index);
+                        await firestoreDatabase.removeMyMasjid(masjids[index]);
 
                         toast("Removed: " + masjids[index].enName);
                       },
@@ -241,13 +253,26 @@ class _MasjidsScreenState extends State<MasjidsScreen> {
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text("My Masjids"),
+        actions: [
+          GestureDetector(
+            onTap: () {
+              setState(() {});
+            },
+            child: Icon(
+              Icons.refresh,
+              size: 26.0,
+            ),
+          ).paddingRight(20)
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () {
-          Navigator.of(context).pushNamed(
-            Routes.create_edit_masjid,
-          );
+          Navigator.of(context)
+              .pushNamed(
+                Routes.create_edit_masjid,
+              )
+              .then(onGoBack);
         },
       ),
       body: WillPopScope(

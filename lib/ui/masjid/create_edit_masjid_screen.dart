@@ -1,8 +1,10 @@
+import 'package:adhan/adhan.dart' as Adhan;
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker/google_maps_place_picker.dart';
+import 'package:hijri/hijri_calendar.dart';
 import 'package:noteapp/constants/app_themes.dart';
 import 'package:noteapp/map.dart';
 import 'package:noteapp/models/masjid_model.dart';
@@ -43,13 +45,31 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
   String selectedMaghrebTime = "00:00 AM";
   String selectedJummahTime = "00:00 AM";
   String selectedIshaTime = "00:00 AM";
+  String ishraqTime = "000";
+  String chashtTime = "";
+  String nisfNahaarTime = "";
 
+  String timeLimitCurrentPrayer = "--";
+  String timeToNextPrayer = "--";
+  DateTime? nextPrayerTime = DateTime.now();
   TimeOfDay selectedTime = TimeOfDay.now();
   GeoFirePoint? selectedPosition;
 
   PickResult? selectedPlace;
 
   final kInitialPosition = LatLng(33.58757, 71.44239);
+
+  var marqueeText = "...........................";
+
+  Adhan.PrayerTimes? prayerTimes;
+
+  Adhan.Prayer? nextPrayer;
+
+  Adhan.Prayer? currentPrayer;
+
+  var saharTime;
+
+  var iftaar;
 
   bool get _hasChangedEnName => _masjid?.enName != selectedEnName;
   bool get _hasChangedUrduName => _masjid?.urduName != selectedUrduName;
@@ -73,18 +93,29 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
       _hasChangedJummahTime ||
       _hasChangedPosition;
 
+  DateFormat formatter = DateFormat('jm');
+
   @override
   void initState() {
     super.initState();
+
+    // Future.delayed(Duration.zero, () {
+    //   this.loadData();
+    // });
+
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+      this.loadData();
+      this.loadPrayerTimes();
+    });
   }
 
-  void loadData() {}
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void loadData() async {
     final Masjid? _masjidModel =
         ModalRoute.of(context)?.settings.arguments as Masjid?;
+
+    _enNameController = TextEditingController(text: _masjid?.enName ?? "");
+    _urduNameController = TextEditingController(text: _masjid?.urduName ?? "");
+
     if (_masjidModel != null) {
       _masjid = _masjidModel;
     }
@@ -103,8 +134,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
     selectedIshaTime = _masjid?.ishaTime ?? "00:00 AM";
     selectedPosition = _masjid?.position;
 
-    print("Position $selectedPosition");
-
+    setState(() {});
     if (selectedPosition != null)
       MapsUtil.getMarker(
               latlng: LatLng(
@@ -113,6 +143,125 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
         allMarkers.add(marker);
         setState(() {});
       });
+  }
+
+  int minutesBetween(DateTime from, DateTime to) {
+    from = DateTime(from.year, from.month, from.day);
+    to = DateTime(to.year, to.month, to.day);
+    return (to.difference(from).inHours / 24).round();
+  }
+
+  void loadPrayerTimes() async {
+    if (selectedPosition == null) return;
+    setState(() {
+      marqueeText = "لآ اِلَهَ اِلّا اللّهُ مُحَمَّدٌ رَسُوُل اللّه ";
+    });
+
+    var nyParams = Adhan.CalculationMethod.karachi.getParameters();
+
+    setState(() {
+      // loading = false;
+
+      prayerTimes = Adhan.PrayerTimes(
+          // Coordinates(33.5834, 71.4332),
+          Adhan.Coordinates(
+              selectedPosition!.latitude, selectedPosition!.longitude),
+          Adhan.DateComponents.from(DateTime.now()),
+          nyParams);
+
+      if (prayerTimes != null) {
+        nextPrayerTime = prayerTimes!.timeForPrayer(prayerTimes!.nextPrayer());
+
+        timeLimitCurrentPrayer = nextPrayerTime != null
+            ? formatter.format(nextPrayerTime!).toString()
+            : "--";
+
+        currentPrayer = prayerTimes!.currentPrayer();
+        nextPrayer = prayerTimes!.nextPrayer();
+
+        timeToNextPrayer = getTimeToNextPrayer();
+
+        print("Time for next prayer $timeLimitCurrentPrayer");
+
+        ishraqTime = formatter
+            .format(prayerTimes!.sunrise.add(Duration(minutes: 15)))
+            .toString()
+            .replaceAll('AM', '')
+            .replaceAll('PM', '');
+
+        var milliSeconds = prayerTimes!.maghrib
+                .difference(prayerTimes!.sunrise)
+                .inMilliseconds /
+            4;
+        chashtTime = formatter
+            .format(prayerTimes!.sunrise
+                .add(Duration(milliseconds: milliSeconds.round())))
+            .toString()
+            .replaceAll('AM', '')
+            .replaceAll('PM', '');
+
+        nisfNahaarTime = formatter
+            .format(prayerTimes!.dhuhr.add(Duration(minutes: -15)))
+            .toString()
+            .replaceAll('AM', '')
+            .replaceAll('PM', '');
+
+        saharTime = formatter
+            .format(prayerTimes!.fajr.add(Duration(minutes: -5)))
+            .toString()
+            .replaceAll('AM', '')
+            .replaceAll('PM', '');
+
+        iftaar = formatter
+            .format(prayerTimes!.maghrib)
+            .toString()
+            .replaceAll('AM', '')
+            .replaceAll('PM', '');
+
+        var formattedDtate = DateFormat.yMMMEd('ur_PK');
+        var dateString = formattedDtate.format(DateTime.now()) + "            ";
+        print(dateString);
+
+        HijriCalendar.setLocal('en');
+        var _todayHijriEnglish = HijriCalendar.now();
+
+        String hijriEngYear = _todayHijriEnglish.hYear.toString();
+
+        String hijriEngDay = _todayHijriEnglish.hDay.toString();
+
+        HijriCalendar.setLocal('ar');
+        var _todayHijriArabic = HijriCalendar.now();
+
+        String today = "";
+        String todayHijriText = hijriEngDay +
+            " " +
+            _todayHijriArabic.toFormat("MMMM") +
+            " " +
+            hijriEngYear +
+            "\u202C" +
+            "            ";
+
+        String ishraqText = "اشراق :" + "\u202C" + ishraqTime + "            ";
+        String chashtText = "چاشت :" + "\u202C" + chashtTime + "           ";
+        String nisfNahaarText =
+            "نصف النہار:" + "\u202C" + nisfNahaarTime + "            ";
+
+        marqueeText = dateString +
+            todayHijriText +
+            ishraqText +
+            chashtText +
+            nisfNahaarText;
+
+        print(marqueeText);
+      }
+      // loadingPrayers = false;
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    print("Dependcy Change Called");
+    super.didChangeDependencies();
   }
 
   @override
@@ -139,29 +288,61 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
     );
   }
 
-  void saveMasjid(BuildContext context) {
+  void saveMasjid(BuildContext context) async {
+    if (selectedEnName.isEmpty) {
+      toast("English Name cannot be empty", bgColor: Colors.redAccent);
+      return;
+    }
+
+    if (selectedUrduName.isEmpty) {
+      toast("Urdu Name cannot be empty", bgColor: Colors.redAccent);
+      return;
+    }
+
     if (_formKey.currentState!.validate()) {
       FocusScope.of(context).unfocus();
 
       final firestoreDatabase =
           Provider.of<FirestoreDatabase>(context, listen: false);
 
-      firestoreDatabase.setMasjid(Masjid(
-          id: _masjid?.id ?? Uuid().v1(),
-          enName: _enNameController.text,
-          urduName: _urduNameController.text,
-          address: "Address",
-          city: "Cityaaa",
-          fajrTime: selectedFajrTime,
-          asarTime: selectedAsarTime,
-          zuhrTime: selectedZuhrTime,
-          maghrebTime: selectedMaghrebTime,
-          ishaTime: selectedIshaTime,
-          jummahTime: selectedJummahTime,
-          position: selectedPosition,
-          createdBy: firestoreDatabase.uid));
+      List<String>? myMasjids = getStringListAsync('myMasjids');
 
-      Navigator.of(context).pop();
+      var masjidId = _masjid?.id ?? Uuid().v1();
+
+      if (myMasjids == null || myMasjids.isEmpty) {
+        myMasjids = [];
+        myMasjids.add(masjidId);
+      } else {
+        if (!myMasjids.contains(masjidId)) myMasjids.add(masjidId);
+      }
+      await setValue("myMasjids", myMasjids);
+
+      firestoreDatabase
+          .setMasjid(Masjid(
+              id: masjidId,
+              enName: selectedEnName,
+              urduName: selectedUrduName,
+              address: "Address",
+              city: "Cityaaa",
+              fajrTime: selectedFajrTime,
+              asarTime: selectedAsarTime,
+              zuhrTime: selectedZuhrTime,
+              maghrebTime: selectedMaghrebTime,
+              ishaTime: selectedIshaTime,
+              jummahTime: selectedJummahTime,
+              position: selectedPosition,
+              createdBy: firestoreDatabase.uid))
+          .then((value) {
+        firestoreDatabase.setMyMasjid(masjidId).then((value) {
+          toast("Masjid saved successfully", bgColor: Colors.green);
+          Navigator.of(context).pop();
+        });
+      });
+
+      // final Masjid? _masjidModel =
+      //     ModalRoute.of(context)?.settings.arguments as Masjid?;
+
+      // Navigator.of(context).pop();
     }
   }
 
@@ -170,6 +351,48 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
     _enNameController.dispose();
     _urduNameController.dispose();
     super.dispose();
+  }
+
+  String getTimeToNextPrayer() {
+    String nextJamaatTime = "--";
+
+    if (prayerTimes == null) return nextJamaatTime;
+
+    switch (this.prayerTimes!.nextPrayer()) {
+      case Adhan.Prayer.fajr:
+        nextJamaatTime = selectedFajrTime;
+        break;
+      case Adhan.Prayer.dhuhr:
+        nextJamaatTime = selectedZuhrTime;
+        break;
+      case Adhan.Prayer.asr:
+        nextJamaatTime = selectedAsarTime;
+        break;
+      case Adhan.Prayer.maghrib:
+        nextJamaatTime = selectedMaghrebTime;
+        break;
+      case Adhan.Prayer.isha:
+        nextJamaatTime = selectedIshaTime;
+        break;
+      default:
+    }
+
+    TimeOfDay _nextTime = stringToTimeOfDay(nextJamaatTime);
+    TimeOfDay _nowTime = TimeOfDay.now();
+
+    double _doubleNextTime =
+        _nextTime.hour.toDouble() + (_nextTime.minute.toDouble() / 60);
+    double _doubleNowTime =
+        _nowTime.hour.toDouble() + (_nowTime.minute.toDouble() / 60);
+
+    double _timeDiff = _doubleNextTime - _doubleNowTime;
+
+    int _hr = _timeDiff.truncate();
+    int _minute = ((_timeDiff - _timeDiff.truncate()) * 60).truncate();
+
+    print('$_hr Hour and also $_minute min');
+
+    return "$_hr:$_minute";
   }
 
   Future<String> _selectTime(
@@ -192,14 +415,6 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
     // Test if location services are enabled.
     serviceEnabled = await _geolocatorPlatform.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
-      // _updatePositionList(
-      //   _PositionItemType.log,
-      //   _kLocationServicesDisabledMessage,
-      // );
-
       return false;
     }
 
@@ -207,32 +422,14 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
     if (permission == LocationPermission.denied) {
       permission = await _geolocatorPlatform.requestPermission();
       if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
-
         return false;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      // _updatePositionList(
-      //   _PositionItemType.log,
-      //   _kPermissionDeniedForeverMessage,
-      // );
-
       return false;
     }
 
-    // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
-    // _updatePositionList(
-    //   _PositionItemType.log,
-    //   _kPermissionGrantedMessage,
-    // );
     return true;
   }
 
@@ -254,18 +451,6 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
                 ).center().onTap(() => _displayEngnameDialog(context)),
               ),
               24.height,
-              // TextFormField(
-              //   controller: _enNameController,
-              //   style: Theme.of(context).textTheme.bodyText1,
-              //   validator: (value) =>
-              //       value!.isEmpty ? "English name can't be empty" : null,
-              //   decoration: InputDecoration(
-              //     enabledBorder: OutlineInputBorder(
-              //         borderSide: BorderSide(
-              //             color: Theme.of(context).iconTheme.color!, width: 2)),
-              //     labelText: "English Name",
-              //   ),
-              // ),
               Container(
                 decoration: AppThemes.myRightBoxDecoration(),
                 child: Text(
@@ -279,41 +464,17 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
               36.height,
               _masjid == null
                   ? Container()
-                  : Container(
-                      padding: const EdgeInsets.all(8.0),
-                      constraints: BoxConstraints(
-                          minHeight: 60,
-                          minWidth: double.infinity,
-                          maxHeight: 60),
-                      child: Marquee.Marquee(
-                        text:
-                            'لآ اِلَهَ اِلّا اللّهُ مُحَمَّدٌ رَسُوُل اللّه  - لآ اِلَهَ اِلّا اللّهُ مُحَمَّدٌ رَسُوُل اللّهِ - لآ اِلَهَ اِلّا اللّهُ مُحَمَّدٌ رَسُوُل اللّهِ',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: Colors.green,
-                            backgroundColor: Colors.black),
-                        scrollAxis: Axis.horizontal,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        blankSpace: 20.0,
-                        velocity: 100.0,
-                        pauseAfterRound: Duration(seconds: 1),
-                        startPadding: 10.0,
-                        accelerationDuration: Duration(seconds: 1),
-                        accelerationCurve: Curves.linear,
-                        decelerationDuration: Duration(milliseconds: 500),
-                        decelerationCurve: Curves.easeOut,
-                        textDirection: ui.TextDirection.rtl,
-                      ),
-                      // child: Marquee(
-                      //   direction: Axis.horizontal,
-                      //   animationDuration: Duration(milliseconds: 100),
-                      //   pauseDuration: Duration(milliseconds: 100),
-                      //   child: Text(
-                      //       "لآ اِلَهَ اِلّا اللّهُ مُحَمَّدٌ رَسُوُل اللّه  - لآ اِلَهَ اِلّا اللّهُ مُحَمَّدٌ رَسُوُل اللّهِ - لآ اِلَهَ اِلّا اللّهُ مُحَمَّدٌ رَسُوُل اللّه"),
-                      // ),
-                    ),
-
+                  : MarqueeWidget(marqueeText: marqueeText),
+              16.height,
+              TimeToNextJamaat(
+                timeLimitCurrentPrayer: timeLimitCurrentPrayer,
+                timeToNextJamaat: getTimeToNextPrayer(),
+              ),
+              16.height,
+              SaharIftaarTime(
+                sahar: saharTime,
+                iftaar: iftaar,
+              ),
               16.height,
               WaktuSalat(
                 name: "الفجر",
@@ -324,7 +485,6 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
 
                 setState(() {
                   selectedFajrTime = str;
-                  print(_hasChangedFajrTime);
                 });
               }),
               16.height,
@@ -529,6 +689,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
                     selectedEnName = value;
                   });
                 },
+                onSaved: (newValue) => selectedEnName = newValue.toString(),
                 maxLines: 3,
                 controller: _enNameController,
                 style: Theme.of(context).textTheme.bodyText1,
@@ -612,6 +773,118 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
             ],
           );
         });
+  }
+}
+
+class TimeToNextJamaat extends StatelessWidget {
+  const TimeToNextJamaat({
+    Key? key,
+    required this.timeLimitCurrentPrayer,
+    required this.timeToNextJamaat,
+  }) : super(key: key);
+
+  final String timeLimitCurrentPrayer;
+  final String timeToNextJamaat;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Row(
+        children: [
+          Text(
+              "انتہائے وقت: ${timeLimitCurrentPrayer.replaceAll("AM", "").replaceAll("PM", "")}",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.green,
+                  backgroundColor: Colors.black)),
+          Spacer(),
+          Text(" بقیہ وقت برائے جماعت: $timeToNextJamaat",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.green,
+                  backgroundColor: Colors.black))
+        ],
+      ),
+    );
+  }
+}
+
+class SaharIftaarTime extends StatelessWidget {
+  const SaharIftaarTime({
+    Key? key,
+    required this.sahar,
+    required this.iftaar,
+  }) : super(key: key);
+
+  final String sahar;
+  final String iftaar;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Row(
+        children: [
+          Text(
+            " افطار: $iftaar",
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.green,
+                backgroundColor: Colors.black),
+          ),
+          Spacer(),
+          Text(
+            "سحر: ${sahar.replaceAll("AM", "").replaceAll("PM", "")}",
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.green,
+                backgroundColor: Colors.black),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MarqueeWidget extends StatelessWidget {
+  const MarqueeWidget({
+    Key? key,
+    required this.marqueeText,
+  }) : super(key: key);
+
+  final String marqueeText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      constraints: BoxConstraints(
+        minHeight: 60,
+        minWidth: 200,
+        maxHeight: 60,
+        maxWidth: 200,
+      ),
+      child: Marquee.Marquee(
+        text: marqueeText,
+        style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: Colors.green,
+            backgroundColor: Colors.black),
+        scrollAxis: Axis.horizontal,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        blankSpace: 200.0,
+        velocity: 50.0,
+        pauseAfterRound: Duration(seconds: 1),
+        startPadding: 100.0,
+        accelerationDuration: Duration(seconds: 1),
+        accelerationCurve: Curves.linear,
+        decelerationDuration: Duration(milliseconds: 500),
+        decelerationCurve: Curves.easeOut,
+        textDirection: ui.TextDirection.rtl,
+      ),
+    );
   }
 }
 

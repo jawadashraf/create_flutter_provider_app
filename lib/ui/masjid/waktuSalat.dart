@@ -21,7 +21,7 @@ class WaktuSalat extends StatelessWidget {
           Row(
             children: <Widget>[
               GlowText(
-                time,
+                time.toString().replaceAll('AM', '').replaceAll('PM', ''),
                 blurRadius: 10,
                 style: TextStyle(
                     color: isCurrent

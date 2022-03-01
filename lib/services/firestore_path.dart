@@ -14,4 +14,5 @@ class FirestorePath {
       'users/$uid/my_masjids/$masjidId';
   static String myMasjids(String uid) => 'users/$uid/my_masjids';
   static String user(String uId) => 'uers/$uId';
+  static String masjidsCreatedByMe(String uid) => 'masjids';
 }
