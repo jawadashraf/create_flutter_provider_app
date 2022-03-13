@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:noteapp/models/masjid_model.dart';
 import 'package:noteapp/models/todo_model.dart';
 import 'package:noteapp/models/user_model.dart';
@@ -43,11 +44,17 @@ class FirestoreDatabase {
     await _firestoreService.deleteData(path: FirestorePath.todo(uid, todo.id));
   }
 
-  Future<void> setMyMasjid(String masjidId) async =>
+  Future<void> setMyMasjid(String masjidId, {bool isDefault = false}) async {
+    if (isDefault = true)
       await _firestoreService.set(
-        path: FirestorePath.myMasjid(uid, masjidId),
-        data: {"masjidId": masjidId},
+        path: FirestorePath.user(uid),
+        data: {"defaultMasjidId": masjidId},
       );
+    await _firestoreService.set(
+      path: FirestorePath.myMasjid(uid, masjidId),
+      data: {"masjidId": masjidId, "default": isDefault},
+    );
+  }
 
   Future<void> removeMyMasjid(Masjid masjid) async {
     await _firestoreService.deleteData(
@@ -96,10 +103,25 @@ class FirestoreDatabase {
   }
 
 //Method to create/update masjid
-  Future<void> setMasjid(Masjid masjid) async => await _firestoreService.set(
-        path: FirestorePath.masjid(masjid.id),
-        data: masjid.toMap(),
+  Future<void> setMasjid(Masjid masjid, {bool isDefault = false}) async {
+    if (isDefault = true)
+      await _firestoreService.set(
+        path: FirestorePath.user(uid),
+        data: {"defaultMasjidId": masjid.id},
       );
+
+    await _firestoreService.set(
+      path: FirestorePath.masjid(masjid.id),
+      data: masjid.toMap(),
+    );
+  }
+
+  Future<void> setDefaultMasjid(String masjidId) async {
+    await _firestoreService.set(
+      path: FirestorePath.user(uid),
+      data: {"defaultMasjidId": masjidId},
+    );
+  }
 
   //Method to delete masjid entry
   Future<void> deleteMasjid(Masjid masjid) async {
@@ -123,6 +145,19 @@ class FirestoreDatabase {
   //       path: FirestorePath.user(uid),
   //       builder: (data, documentId) => UserModel.fromMap(data, documentId),
   //     );
+
+  Future<void> setAllMasjidDefaultToFalse() async {
+    final batchUpdate = FirebaseFirestore.instance.batch();
+
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection(FirestorePath.myMasjids(uid))
+        .get();
+
+    for (DocumentSnapshot ds in querySnapshot.docs) {
+      batchUpdate.update(ds.reference, {'default': false});
+    }
+    await batchUpdate.commit();
+  }
 
   Stream<List<Masjid>> myMasjidsStream(List<String>? masjidIds) {
     print(uid);
@@ -178,8 +213,6 @@ class FirestoreDatabase {
     }).onDone(() {
       //run here
     });
-
-    print(masjidIds);
     return masjidIds;
   }
 
@@ -191,5 +224,25 @@ class FirestoreDatabase {
         return query.where("createdBy", isEqualTo: uid);
       },
     );
+  }
+
+  Future<String?> getDefaultMasjidId() async {
+    // var snapshot = _firestoreService.documentStream(
+    //   path: FirestorePath.user(uid),
+    //   builder: (data, documentId) => data,
+    // );
+
+    // return snapshot.first;
+
+    var collection = FirebaseFirestore.instance.collection('users');
+    var docSnapshot = await collection.doc(uid).get();
+    if (docSnapshot.exists) {
+      Map<String, dynamic> data = docSnapshot.data()!;
+
+      // You can then retrieve the value from the Map like this:
+      return data['defaultMasjidId'];
+    }
+
+    return null;
   }
 }

@@ -6,10 +6,11 @@ class AppThemes {
 
   static const String kLocationServicesDisabledMessage =
       'Location services are disabled.';
-  static const String kPermissionDeniedMessage = 'Permission denied.';
+  static const String kPermissionDeniedMessage = 'Location permission denied.';
   static const String kPermissionDeniedForeverMessage =
-      'Permission denied forever.';
-  static const String kPermissionGrantedMessage = 'Permission granted.';
+      'Location permission denied forever.';
+  static const String kPermissionGrantedMessage =
+      'Location permission granted.';
 
   static const String googleMapApiKey =
       'AIzaSyBd6F8oIHxOePYHPWlUo-duwtmu-E96__8';

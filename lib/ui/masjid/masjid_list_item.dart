@@ -5,7 +5,8 @@ import 'package:noteapp/constants/app_themes.dart';
 class MasjidListItem extends StatelessWidget {
   final enName;
   final urduName;
-  MasjidListItem({this.enName, this.urduName});
+  final isDefault;
+  MasjidListItem({this.enName, this.urduName, this.isDefault = false});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,7 @@ class MasjidListItem extends StatelessWidget {
             child: Text(
               enName,
               style: TextStyle(
-                  color: Colors.white,
+                  color: isDefault ? Colors.greenAccent : Colors.white,
                   fontWeight: FontWeight.normal,
                   fontSize: 16),
             ),
@@ -37,7 +38,7 @@ class MasjidListItem extends StatelessWidget {
               urduName,
               textAlign: TextAlign.right,
               style: TextStyle(
-                  color: Colors.white,
+                  color: isDefault ? Colors.greenAccent : Colors.white,
                   fontWeight: FontWeight.normal,
                   fontSize: 16),
             ),

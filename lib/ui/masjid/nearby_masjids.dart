@@ -32,12 +32,12 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
   // firestore init
   final radius = BehaviorSubject<double>.seeded(20.0);
   final _firestore = FirebaseFirestore.instance;
-  final markers = <MarkerId, Marker>{};
+  var markers = <MarkerId, Marker>{};
 
   late Stream<List<DocumentSnapshot>> stream;
   late Geoflutterfire geo;
 
-  var cameraCenter = LatLng(33.58757, 71.44239);
+  LatLng? cameraCenter = LatLng(33.58757, 71.44239);
 
   late String _darkMapStyle;
 
@@ -178,12 +178,14 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
       body: loading
           ? Center(child: CircularProgressIndicator())
           : currentPosition == null
-              ? Column(
-                  children: [
-                    Text(locationMessage),
-                    ElevatedButton(
-                        onPressed: () => loadData(), child: Text("Try Again"))
-                  ],
+              ? Center(
+                  child: Column(
+                    children: [
+                      Text(locationMessage),
+                      ElevatedButton(
+                          onPressed: () => loadData(), child: Text("Try Again"))
+                    ],
+                  ),
                 )
               : Container(
                   child: Column(
@@ -200,7 +202,7 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
                               GoogleMap(
                                 onMapCreated: _onMapCreated,
                                 initialCameraPosition: CameraPosition(
-                                  target: cameraCenter,
+                                  target: cameraCenter!,
                                   zoom: 11.0,
                                 ),
                                 markers: Set<Marker>.of(markers.values),
@@ -290,6 +292,8 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
   }
 
   void _updateMarkers(List<DocumentSnapshot> documentList) {
+    cameraCenter = null;
+
     documentList.forEach((DocumentSnapshot document) {
       final data = document.data() as Map<String, dynamic>;
 
@@ -297,15 +301,28 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
       final name = data['enName'];
       final id = document.id;
       final urduName = data['urduName'];
+
+      if (cameraCenter == null)
+        cameraCenter = LatLng(point.latitude, point.longitude);
       _addMarker(point.latitude, point.longitude, name, id, urduName);
     });
 
-    // _mapController!.animateCamera(
-    //                                   CameraUpdate.newCameraPosition(
-    //                                       CameraPosition(
-    //                                           target: newlatlang, zoom: 17)
-    //                                       //17 is new zoom level
-    //                                       ));
+    if (cameraCenter != null) {
+      var newPosition =
+          CameraPosition(target: cameraCenter!, zoom: getZoomLevel());
+
+      CameraUpdate update = CameraUpdate.newCameraPosition(newPosition);
+      // CameraUpdate zoom = CameraUpdate.zoomTo(16);
+
+      _mapController!.moveCamera(update);
+    }
+    // _mapController!.animateCamera(CameraUpdate.newCameraPosition(
+    //     CameraPosition(
+    //         target: LatLng(markers[0]!.position.latitude,
+    //             markers[0]!.position.longitude),
+    //         zoom: 8)
+    //     //17 is new zoom level
+    //     ));
   }
 
   double _value = 20.0;
@@ -318,5 +335,15 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
       markers.clear();
     });
     radius.add(value);
+  }
+
+  double getZoomLevel() {
+    if (radius.value < 5) return 20.0;
+
+    if (radius.value <= 10) return 18.0;
+
+    if (radius.value <= 20) return 17.0;
+
+    return 9.0;
   }
 }

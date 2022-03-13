@@ -49,7 +49,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
   String chashtTime = "";
   String nisfNahaarTime = "";
 
-  String timeLimitCurrentPrayer = "--";
+  String timeLimitCurrentPrayer = "00:00";
   String timeToNextPrayer = "--";
   DateTime? nextPrayerTime = DateTime.now();
   TimeOfDay selectedTime = TimeOfDay.now();
@@ -110,6 +110,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
   }
 
   void loadData() async {
+    print("here");
     final Masjid? _masjidModel =
         ModalRoute.of(context)?.settings.arguments as Masjid?;
 
@@ -174,7 +175,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
 
         timeLimitCurrentPrayer = nextPrayerTime != null
             ? formatter.format(nextPrayerTime!).toString()
-            : "--";
+            : "00:00";
 
         currentPrayer = prayerTimes!.currentPrayer();
         nextPrayer = prayerTimes!.nextPrayer();
@@ -354,7 +355,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
   }
 
   String getTimeToNextPrayer() {
-    String nextJamaatTime = "--";
+    String nextJamaatTime = "00:00";
 
     if (prayerTimes == null) return nextJamaatTime;
 
@@ -376,6 +377,8 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
         break;
       default:
     }
+
+    // if (nextJamaatTime == "00") return "--:--";
 
     TimeOfDay _nextTime = stringToTimeOfDay(nextJamaatTime);
     TimeOfDay _nowTime = TimeOfDay.now();
@@ -472,14 +475,15 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
               ),
               16.height,
               SaharIftaarTime(
-                sahar: saharTime,
-                iftaar: iftaar,
+                sahar: saharTime ?? "00",
+                iftaar: iftaar ?? "00",
               ),
               16.height,
               WaktuSalat(
                 name: "الفجر",
                 time: selectedFajrTime,
                 isCurrent: false,
+                prayerIndex: Adhan.Prayer.fajr.index,
               ).onTap(() async {
                 String str = await _selectTime(context, selectedFajrTime);
 
@@ -487,11 +491,12 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
                   selectedFajrTime = str;
                 });
               }),
-              16.height,
+              8.height,
               WaktuSalat(
                 name: "الظہر",
                 time: selectedZuhrTime,
                 isCurrent: false,
+                prayerIndex: Adhan.Prayer.dhuhr.index,
               ).onTap(() async {
                 String str = await _selectTime(context, selectedZuhrTime);
 
@@ -499,11 +504,12 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
                   selectedZuhrTime = str;
                 });
               }),
-              16.height,
+              8.height,
               WaktuSalat(
                 name: "العصر",
                 time: selectedAsarTime,
                 isCurrent: false,
+                prayerIndex: Adhan.Prayer.asr.index,
               ).onTap(() async {
                 String str = await _selectTime(context, selectedAsarTime);
 
@@ -511,11 +517,12 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
                   selectedAsarTime = str;
                 });
               }),
-              16.height,
+              8.height,
               WaktuSalat(
                 name: "المغرب",
                 time: selectedMaghrebTime,
                 isCurrent: false,
+                prayerIndex: Adhan.Prayer.maghrib.index,
               ).onTap(() async {
                 String str = await _selectTime(context, selectedMaghrebTime);
 
@@ -523,11 +530,12 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
                   selectedMaghrebTime = str;
                 });
               }),
-              16.height,
+              8.height,
               WaktuSalat(
                 name: "العشا",
                 time: selectedIshaTime,
                 isCurrent: false,
+                prayerIndex: Adhan.Prayer.isha.index,
               ).onTap(() async {
                 String str = await _selectTime(context, selectedIshaTime);
 
@@ -535,11 +543,12 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
                   selectedIshaTime = str;
                 });
               }),
-              16.height,
+              8.height,
               WaktuSalat(
                 name: "الجمعه",
                 time: selectedJummahTime,
                 isCurrent: false,
+                prayerIndex: 6,
               ).onTap(() async {
                 String str = await _selectTime(context, selectedJummahTime);
 
@@ -889,6 +898,7 @@ class MarqueeWidget extends StatelessWidget {
 }
 
 TimeOfDay stringToTimeOfDay(String tod) {
+  print(tod);
   final format = DateFormat.jm(); //"6:00 AM"
   return TimeOfDay.fromDateTime(format.parse(tod));
 }

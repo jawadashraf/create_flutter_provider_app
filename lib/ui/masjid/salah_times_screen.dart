@@ -63,14 +63,15 @@ class _SalahTimesScreenState extends State<SalahTimesScreen> {
     setState(() {
       loading = false;
 
-      if (currentPosition != null)
+      if (currentPosition != null) {
         nyParams.madhab = hanfiCalculation ? Madhab.hanafi : Madhab.shafi;
 
-      prayerTimes = PrayerTimes(
-          // Coordinates(33.5834, 71.4332),
-          Coordinates(currentPosition!.latitude, currentPosition!.longitude),
-          DateComponents.from(DateTime.now()),
-          nyParams);
+        prayerTimes = PrayerTimes(
+            // Coordinates(33.5834, 71.4332),
+            Coordinates(currentPosition!.latitude, currentPosition!.longitude),
+            DateComponents.from(DateTime.now()),
+            nyParams);
+      }
 
       loadingPrayers = false;
     });
@@ -160,12 +161,14 @@ class _SalahTimesScreenState extends State<SalahTimesScreen> {
       body: loading
           ? CircularProgressIndicator().center()
           : currentPosition == null
-              ? Column(
-                  children: [
-                    Text(locationMessage),
-                    ElevatedButton(
-                        onPressed: () => loadData(), child: Text("Try Again"))
-                  ],
+              ? Center(
+                  child: Column(
+                    children: [
+                      Text(locationMessage),
+                      ElevatedButton(
+                          onPressed: () => loadData(), child: Text("Try Again"))
+                    ],
+                  ),
                 )
               : loadingPrayers
                   ? CircularProgressIndicator().center()
@@ -198,7 +201,7 @@ class _SalahTimesScreenState extends State<SalahTimesScreen> {
                           //     key: const GlobalObjectKey(3),
                           //   ),
                           // ),
-                          // 16.height,
+                          16.height,
                           Builder(
                             builder: (BuildContext context) {
                               if (prayerTimes != null) {

@@ -8,6 +8,7 @@ class UserModel {
   String? photoUrl;
   bool? isAnonymous;
   List<Masjid>? myMasjids;
+  String? defaultMasjidId;
 
   UserModel(
       {required this.uid,
@@ -16,5 +17,6 @@ class UserModel {
       this.phoneNumber,
       this.photoUrl,
       this.isAnonymous,
-      this.myMasjids});
+      this.myMasjids,
+      this.defaultMasjidId});
 }
