@@ -445,17 +445,17 @@ class _MasjidsScreenState extends State<MasjidsScreen> {
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text("My Masjids"),
-        actions: [
-          GestureDetector(
-            onTap: () {
-              setState(() {});
-            },
-            child: Icon(
-              Icons.refresh,
-              size: 26.0,
-            ),
-          ).paddingRight(20)
-        ],
+        // actions: [
+        //   GestureDetector(
+        //     onTap: () {
+        //       setState(() {});
+        //     },
+        //     child: Icon(
+        //       Icons.refresh,
+        //       size: 26.0,
+        //     ),
+        //   ).paddingRight(20)
+        // ],
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),

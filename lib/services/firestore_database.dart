@@ -45,7 +45,7 @@ class FirestoreDatabase {
   }
 
   Future<void> setMyMasjid(String masjidId, {bool isDefault = false}) async {
-    if (isDefault = true)
+    if (isDefault == true)
       await _firestoreService.set(
         path: FirestorePath.user(uid),
         data: {"defaultMasjidId": masjidId},
@@ -104,7 +104,7 @@ class FirestoreDatabase {
 
 //Method to create/update masjid
   Future<void> setMasjid(Masjid masjid, {bool isDefault = false}) async {
-    if (isDefault = true)
+    if (isDefault == true)
       await _firestoreService.set(
         path: FirestorePath.user(uid),
         data: {"defaultMasjidId": masjid.id},

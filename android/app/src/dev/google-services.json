@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "830050945911",
-    "project_id": "prayertimeapp",
-    "storage_bucket": "prayertimeapp.appspot.com"
+    "project_number": "696579514446",
+    "project_id": "hayat-masjid-app",
+    "storage_bucket": "hayat-masjid-app.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:830050945911:android:b56eaffcadb710cf35ef72",
+        "mobilesdk_app_id": "1:696579514446:android:968a93623784e1311ae31f",
         "android_client_info": {
-          "package_name": "com.jawad.prayer"
+          "package_name": "com.hayat.masjid"
         }
       },
       "oauth_client": [
         {
-          "client_id": "830050945911-e88ouaj5nkhnikm5ituugfcsrntpancn.apps.googleusercontent.com",
+          "client_id": "696579514446-483b385nq82k08vhjigm07f84jkl4nqs.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBd6F8oIHxOePYHPWlUo-duwtmu-E96__8"
+          "current_key": "AIzaSyBfrNO5OZyrGJ0X7iQpJrS7wqsqsxSBo4k"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "830050945911-e88ouaj5nkhnikm5ituugfcsrntpancn.apps.googleusercontent.com",
+              "client_id": "696579514446-483b385nq82k08vhjigm07f84jkl4nqs.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
@@ -36,27 +36,27 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:830050945911:android:45b156ff1c205f2735ef72",
+        "mobilesdk_app_id": "1:696579514446:android:4956afbecc8cff991ae31f",
         "android_client_info": {
-          "package_name": "com.jawad.prayer.dev"
+          "package_name": "com.hayat.masjid.dev"
         }
       },
       "oauth_client": [
         {
-          "client_id": "830050945911-e88ouaj5nkhnikm5ituugfcsrntpancn.apps.googleusercontent.com",
+          "client_id": "696579514446-483b385nq82k08vhjigm07f84jkl4nqs.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBd6F8oIHxOePYHPWlUo-duwtmu-E96__8"
+          "current_key": "AIzaSyBfrNO5OZyrGJ0X7iQpJrS7wqsqsxSBo4k"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "830050945911-e88ouaj5nkhnikm5ituugfcsrntpancn.apps.googleusercontent.com",
+              "client_id": "696579514446-483b385nq82k08vhjigm07f84jkl4nqs.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

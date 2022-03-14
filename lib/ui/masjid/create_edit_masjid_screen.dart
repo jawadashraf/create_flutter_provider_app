@@ -376,6 +376,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
         nextJamaatTime = selectedIshaTime;
         break;
       default:
+        return nextJamaatTime;
     }
 
     // if (nextJamaatTime == "00") return "--:--";

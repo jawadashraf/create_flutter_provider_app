@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "830050945911",
+    "project_id": "prayertimeapp",
+    "storage_bucket": "prayertimeapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:830050945911:android:b56eaffcadb710cf35ef72",
+        "android_client_info": {
+          "package_name": "com.jawad.prayer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "830050945911-e88ouaj5nkhnikm5ituugfcsrntpancn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBd6F8oIHxOePYHPWlUo-duwtmu-E96__8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "830050945911-e88ouaj5nkhnikm5ituugfcsrntpancn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:830050945911:android:45b156ff1c205f2735ef72",
+        "android_client_info": {
+          "package_name": "com.jawad.prayer.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "830050945911-e88ouaj5nkhnikm5ituugfcsrntpancn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBd6F8oIHxOePYHPWlUo-duwtmu-E96__8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "830050945911-e88ouaj5nkhnikm5ituugfcsrntpancn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
