@@ -226,6 +226,16 @@ class FirestoreDatabase {
     );
   }
 
+  Stream<List<Masjid>> masjidsByNameStream({String name = ""}) {
+    return _firestoreService.collectionStream(
+      path: FirestorePath.masjids(),
+      builder: (data, documentId) => Masjid.fromMap(data, documentId),
+      queryBuilder: (query) {
+        return query.where("enName", arrayContains: name);
+      },
+    );
+  }
+
   Future<String?> getDefaultMasjidId() async {
     // var snapshot = _firestoreService.documentStream(
     //   path: FirestorePath.user(uid),

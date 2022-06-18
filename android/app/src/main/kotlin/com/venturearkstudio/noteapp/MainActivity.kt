@@ -1,4 +1,4 @@
-package com.venturearkstudio.noteapp
+package com.hayat.masjid
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

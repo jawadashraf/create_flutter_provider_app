@@ -16,6 +16,7 @@ import 'package:noteapp/ui/masjid/masjid_list_item.dart';
 import 'package:noteapp/ui/masjid/masjids_created_by_me_screen.dart';
 import 'package:noteapp/ui/masjid/nearby_masjids.dart';
 import 'package:noteapp/ui/masjid/salah_times_screen.dart';
+import 'package:noteapp/ui/masjid/search_masjids_screen.dart';
 import 'package:noteapp/ui/qiblah/qiblah_main.dart';
 import 'package:noteapp/ui/todo/empty_content.dart';
 import 'package:provider/provider.dart';
@@ -233,6 +234,22 @@ class _MasjidsScreenState extends State<MasjidsScreen> {
                 );
               },
             ),
+            // ListTile(
+            //   leading: const Icon(Icons.search),
+            //   title: const Text(
+            //     'Search Masjids',
+            //     style: TextStyle(fontSize: 18.0, color: Colors.black87),
+            //   ),
+            //   onTap: () {
+            //     finish(context);
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute<void>(
+            //         builder: (BuildContext context) => SearchMasjidsScreen(),
+            //       ),
+            //     );
+            //   },
+            // ),
             const Divider(
               height: 10,
               thickness: 1,

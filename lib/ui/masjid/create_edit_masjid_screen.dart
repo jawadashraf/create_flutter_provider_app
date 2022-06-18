@@ -76,8 +76,8 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
   bool get _hasChangedFajrTime => _masjid?.fajrTime != selectedFajrTime;
   bool get _hasChangedZuhrTime => _masjid?.zuhrTime != selectedZuhrTime;
   bool get _hasChangedAsarTime => _masjid?.asarTime != selectedAsarTime;
-  bool get _hasChangedMaghrebTime =>
-      _masjid?.maghrebTime != selectedMaghrebTime;
+  // bool get _hasChangedMaghrebTime =>
+  //     _masjid?.maghrebTime != selectedMaghrebTime;
   bool get _hasChangedIshaTime => _masjid?.ishaTime != selectedIshaTime;
   bool get _hasChangedJummahTime => _masjid?.jummahTime != selectedJummahTime;
   bool get _hasChangedPosition => _masjid?.position != selectedPosition;
@@ -88,12 +88,17 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
       _hasChangedFajrTime ||
       _hasChangedAsarTime ||
       _hasChangedZuhrTime ||
-      _hasChangedMaghrebTime ||
+      // _hasChangedMaghrebTime ||
       _hasChangedIshaTime ||
       _hasChangedJummahTime ||
       _hasChangedPosition;
 
   DateFormat formatter = DateFormat('jm');
+
+  String _groupValue = "None";
+
+  List<String> _status = ["None", "English", "Urdu", "Both"];
+  bool displayArabic = true;
 
   @override
   void initState() {
@@ -119,6 +124,8 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
 
     if (_masjidModel != null) {
       _masjid = _masjidModel;
+    } else {
+      _groupValue = "Both";
     }
 
     _enNameController = TextEditingController(text: _masjid?.enName ?? "");
@@ -130,7 +137,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
     selectedFajrTime = _masjid?.fajrTime ?? "00:00 AM";
     selectedZuhrTime = _masjid?.zuhrTime ?? "00:00 AM";
     selectedAsarTime = _masjid?.asarTime ?? "00:00 AM";
-    selectedMaghrebTime = _masjid?.maghrebTime ?? "00:00 AM";
+    // selectedMaghrebTime = _masjid?.maghrebTime ?? "00:00 AM";
     selectedJummahTime = _masjid?.jummahTime ?? "00:00 AM";
     selectedIshaTime = _masjid?.ishaTime ?? "00:00 AM";
     selectedPosition = _masjid?.position;
@@ -172,6 +179,12 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
 
       if (prayerTimes != null) {
         nextPrayerTime = prayerTimes!.timeForPrayer(prayerTimes!.nextPrayer());
+
+        selectedMaghrebTime = formatter
+            .format(prayerTimes!.timeForPrayer(Adhan.Prayer.maghrib)!)
+            .toString()
+            .replaceAll('AM', '')
+            .replaceAll('PM', '');
 
         timeLimitCurrentPrayer = nextPrayerTime != null
             ? formatter.format(nextPrayerTime!).toString()
@@ -267,6 +280,41 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
 
   @override
   Widget build(BuildContext context) {
+    void handleClick(String value) {
+      switch (value) {
+        case 'English Name':
+          setState(() {
+            _groupValue = "English";
+          });
+          break;
+        case 'Urdu Name':
+          setState(() {
+            _groupValue = "Urdu";
+          });
+          break;
+        case 'Both Names':
+          setState(() {
+            _groupValue = "Both";
+          });
+          break;
+        case 'No Names':
+          setState(() {
+            _groupValue = "None";
+          });
+          break;
+        case 'Urdu Prayer':
+          setState(() {
+            displayArabic = true;
+          });
+          break;
+        case 'English Prayer':
+          setState(() {
+            displayArabic = false;
+          });
+          break;
+      }
+    }
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -280,7 +328,25 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
         actions: <Widget>[
           TextButton(
               onPressed: _hasChangedValue ? () => saveMasjid(context) : null,
-              child: Text("Save"))
+              child: Text("Save")),
+          PopupMenuButton<String>(
+            onSelected: handleClick,
+            itemBuilder: (BuildContext context) {
+              return {
+                'English Name',
+                'Urdu Name',
+                'Both Names',
+                'No Names',
+                'Urdu Prayer',
+                'English Prayer'
+              }.map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
+            },
+          ),
         ],
       ),
       body: Center(
@@ -442,48 +508,75 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
       key: _formKey,
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(10, 4, 10, 4),
           child: Column(
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Container(
-                decoration: AppThemes.myLeftBoxDecoration(),
-                child: Text(
-                  selectedEnName.isEmpty ? "English Name" : selectedEnName,
-                  style: TextStyle(fontSize: 24.0),
-                ).center().onTap(() => _displayEngnameDialog(context)),
-              ),
-              24.height,
-              Container(
-                decoration: AppThemes.myRightBoxDecoration(),
-                child: Text(
-                        selectedUrduName.isEmpty
-                            ? "Urdu Name"
-                            : selectedUrduName,
-                        style: TextStyle(fontSize: 24.0))
-                    .center()
-                    .onTap(() => _displayUrdunameDialog(context)),
-              ),
-              36.height,
+              (_groupValue == "English" || _groupValue == "Both")
+                  ? Container(
+                      decoration: AppThemes.myLeftBoxDecoration(),
+                      child: Text(
+                        selectedEnName.isEmpty
+                            ? "English Name"
+                            : selectedEnName,
+                        style: TextStyle(fontSize: 24.0),
+                      ).center().onTap(() => _displayEngnameDialog(context)),
+                    )
+                  : Container(),
+              (_groupValue == "English" || _groupValue == "Both")
+                  ? 24.height
+                  : Container(),
+              (_groupValue == "Urdu" || _groupValue == "Both")
+                  ? Container(
+                      decoration: AppThemes.myRightBoxDecoration(),
+                      child: Text(
+                              selectedUrduName.isEmpty
+                                  ? "Urdu Name"
+                                  : selectedUrduName,
+                              style: TextStyle(fontSize: 24.0))
+                          .center()
+                          .onTap(() => _displayUrdunameDialog(context)),
+                    )
+                  : Container(),
+              // RadioGroup<String>.builder(
+              //   direction: Axis.horizontal,
+              //   groupValue: _groupValue,
+              //   horizontalAlignment: MainAxisAlignment.spaceAround,
+              //   onChanged: (value) => setState(() {
+              //     _groupValue = value!;
+              //     // displayArabic = (_groupValue == "None" ||
+              //     //         _groupValue == "Urdu" ||
+              //     //         _groupValue == "Both")
+              //     //     ? true
+              //     //     : false;
+              //   }),
+              //   items: _status,
+              //   textStyle: TextStyle(fontSize: 15, color: Colors.green),
+              //   itemBuilder: (item) => RadioButtonBuilder(
+              //     item,
+              //   ),
+              // ),
+              // 4.height,
               _masjid == null
                   ? Container()
                   : MarqueeWidget(marqueeText: marqueeText),
-              16.height,
+              // 10.height,
               TimeToNextJamaat(
                 timeLimitCurrentPrayer: timeLimitCurrentPrayer,
                 timeToNextJamaat: getTimeToNextPrayer(),
               ),
-              16.height,
+              // 10.height,
               SaharIftaarTime(
                 sahar: saharTime ?? "00",
                 iftaar: iftaar ?? "00",
               ),
-              16.height,
+              // 10.height,
               WaktuSalat(
-                name: "الفجر",
+                name: displayArabic ? "الفجر" : "Fajr",
                 time: selectedFajrTime,
-                isCurrent: false,
+                isCurrent: prayerTimes != null &&
+                    Adhan.Prayer.fajr == prayerTimes!.currentPrayer(),
                 prayerIndex: Adhan.Prayer.fajr.index,
               ).onTap(() async {
                 String str = await _selectTime(context, selectedFajrTime);
@@ -494,9 +587,10 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
               }),
               8.height,
               WaktuSalat(
-                name: "الظہر",
+                name: displayArabic ? "الظہر" : "Zuhr",
                 time: selectedZuhrTime,
-                isCurrent: false,
+                isCurrent: prayerTimes != null &&
+                    Adhan.Prayer.dhuhr == prayerTimes!.currentPrayer(),
                 prayerIndex: Adhan.Prayer.dhuhr.index,
               ).onTap(() async {
                 String str = await _selectTime(context, selectedZuhrTime);
@@ -507,9 +601,10 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
               }),
               8.height,
               WaktuSalat(
-                name: "العصر",
+                name: displayArabic ? "العصر" : "Asr",
                 time: selectedAsarTime,
-                isCurrent: false,
+                isCurrent: prayerTimes != null &&
+                    Adhan.Prayer.asr == prayerTimes!.currentPrayer(),
                 prayerIndex: Adhan.Prayer.asr.index,
               ).onTap(() async {
                 String str = await _selectTime(context, selectedAsarTime);
@@ -520,9 +615,10 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
               }),
               8.height,
               WaktuSalat(
-                name: "المغرب",
+                name: displayArabic ? "المغرب" : "Maghrib",
                 time: selectedMaghrebTime,
-                isCurrent: false,
+                isCurrent: prayerTimes != null &&
+                    Adhan.Prayer.maghrib == prayerTimes!.currentPrayer(),
                 prayerIndex: Adhan.Prayer.maghrib.index,
               ).onTap(() async {
                 String str = await _selectTime(context, selectedMaghrebTime);
@@ -533,9 +629,10 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
               }),
               8.height,
               WaktuSalat(
-                name: "العشا",
+                name: displayArabic ? "العشا" : "Isha",
                 time: selectedIshaTime,
-                isCurrent: false,
+                isCurrent: prayerTimes != null &&
+                    Adhan.Prayer.isha == prayerTimes!.currentPrayer(),
                 prayerIndex: Adhan.Prayer.isha.index,
               ).onTap(() async {
                 String str = await _selectTime(context, selectedIshaTime);
@@ -546,7 +643,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
               }),
               8.height,
               WaktuSalat(
-                name: "الجمعه",
+                name: displayArabic ? "الجمعه" : "Jummah",
                 time: selectedJummahTime,
                 isCurrent: false,
                 prayerIndex: 6,

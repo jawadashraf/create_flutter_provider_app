@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_glow/flutter_glow.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:noteapp/constants/app_font_family.dart';
 import 'package:noteapp/constants/app_themes.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -55,7 +56,7 @@ class WaktuSalat extends StatelessWidget {
 
             SlidableAction(
               onPressed: (context) async {
-                _scheduleDailyNotification(prayerIndex, time, "Title: $name",
+                _scheduleDailyNotification(prayerIndex, time, "Time for: $name",
                     "Body", "chanelId:$name", "channel name", "description");
 
                 // _checkPendingNotificationRequests();
@@ -88,7 +89,7 @@ class WaktuSalat extends StatelessWidget {
                             : AppThemes.clockColorRed,
                         fontWeight: FontWeight.normal,
                         fontFamily: AppFontFamily.digital,
-                        fontSize: 48),
+                        fontSize: 60),
                   ),
                   // SizedBox(
                   //   width: 10,
@@ -132,7 +133,7 @@ Future<void> _scheduleDailyNotification(
   await flutterLocalNotificationsPlugin.zonedSchedule(
       prayerIndex,
       title,
-      body,
+      null,
       _nextInstanceOfJamaatTime(currentTimeInString),
       NotificationDetails(
         android: AndroidNotificationDetails(channelId, channelName,
@@ -142,6 +143,8 @@ Future<void> _scheduleDailyNotification(
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time);
+  toast(
+      "Notification set at ${_nextInstanceOfJamaatTime(currentTimeInString)}");
 }
 
 tz.TZDateTime _nextInstanceOfJamaatTime(String currentTimeInString) {

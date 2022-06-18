@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 
 class Masjid {
@@ -99,6 +100,26 @@ class Masjid {
       'position': position?.data,
       'createdBy': createdBy
     };
+  }
+
+  List<Masjid> dataListFromSnapshot(QuerySnapshot querySnapshot) {
+    return querySnapshot.docs.map((snapshot) {
+      final Map<String, dynamic> dataMap =
+          snapshot.data() as Map<String, dynamic>;
+
+      return Masjid(
+        enName: dataMap['enName'],
+        urduName: dataMap['urduName'],
+        asarTime: '',
+        createdBy: '',
+        fajrTime: '',
+        id: '',
+        ishaTime: '',
+        jummahTime: '',
+        maghrebTime: '',
+        zuhrTime: '',
+      );
+    }).toList();
   }
 
   // static String encode(List<Masjid> masjids) => json.encode(
