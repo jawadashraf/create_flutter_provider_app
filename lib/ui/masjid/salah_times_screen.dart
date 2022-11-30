@@ -9,7 +9,6 @@ import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:noteapp/constants/app_themes.dart';
 import 'package:noteapp/ui/masjid/waktuSalat.dart';
-import 'package:analog_clock/analog_clock.dart';
 
 // enum Salahs { fajr, zuhr, asar, maghreb, isha }
 

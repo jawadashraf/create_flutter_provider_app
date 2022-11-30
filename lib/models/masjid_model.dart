@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geoflutterfire/geoflutterfire.dart';
 
 class Masjid {
   String id;
@@ -15,7 +14,7 @@ class Masjid {
   String maghrebTime;
   String ishaTime;
   String jummahTime;
-  GeoFirePoint? position;
+  GeoPoint? position;
   String createdBy;
 
   Masjid(
@@ -64,8 +63,8 @@ class Masjid {
     //     minute: int.parse(data['jummahTime'].split(":")[1]));
     String createdBy = data['createdBy'];
 
-    GeoFirePoint? position = data["position"] != null
-        ? GeoFirePoint(data["position"]["geopoint"].latitude,
+    GeoPoint? position = data["position"] != null
+        ? GeoPoint(data["position"]["geopoint"].latitude,
             data["position"]["geopoint"].longitude)
         : null;
 
@@ -97,7 +96,7 @@ class Masjid {
       'maghrebTime': maghrebTime,
       'ishaTime': ishaTime,
       'jummahTime': jummahTime,
-      'position': position?.data,
+      'position': position,
       'createdBy': createdBy
     };
   }

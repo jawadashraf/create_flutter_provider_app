@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firestore_search/firestore_search.dart';
+
 import 'package:flutter/material.dart';
 import 'package:noteapp/models/masjid_model.dart';
 

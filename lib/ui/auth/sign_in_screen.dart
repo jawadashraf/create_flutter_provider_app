@@ -106,7 +106,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     ? Center(
                         child: CircularProgressIndicator(),
                       )
-                    : RaisedButton(
+                    : ElevatedButton(
                         child: Text(
                           AppLocalizations.of(context)
                               .translate("loginBtnSignIn"),
@@ -123,7 +123,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                     _passwordController.text);
 
                             if (!status) {
-                              _scaffoldKey.currentState!.showSnackBar(SnackBar(
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
                                 content: Text(AppLocalizations.of(context)
                                     .translate("loginTxtErrorSignIn")),
                               ));
@@ -150,10 +151,13 @@ class _SignInScreenState extends State<SignInScreen> {
                     ? Center(
                         child: null,
                       )
-                    : FlatButton(
-                        child: Text(AppLocalizations.of(context)
-                            .translate("loginBtnLinkCreateAccount")),
-                        textColor: Theme.of(context).iconTheme.color,
+                    : TextButton(
+                        child: Text(
+                          AppLocalizations.of(context)
+                              .translate("loginBtnLinkCreateAccount"),
+                          style: TextStyle(
+                              color: Theme.of(context).iconTheme.color),
+                        ),
                         onPressed: () {
                           Navigator.of(context)
                               .pushReplacementNamed(Routes.register);

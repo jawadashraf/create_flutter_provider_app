@@ -1,9 +1,10 @@
 import 'package:adhan/adhan.dart' as Adhan;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:geoflutterfire/geoflutterfire.dart';
+
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_place_picker/google_maps_place_picker.dart';
+import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:noteapp/constants/app_themes.dart';
 import 'package:noteapp/map.dart';
@@ -53,7 +54,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
   String timeToNextPrayer = "--";
   DateTime? nextPrayerTime = DateTime.now();
   TimeOfDay selectedTime = TimeOfDay.now();
-  GeoFirePoint? selectedPosition;
+  GeoPoint? selectedPosition;
 
   PickResult? selectedPlace;
 
@@ -108,7 +109,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
     //   this.loadData();
     // });
 
-    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       this.loadData();
       this.loadPrayerTimes();
     });
@@ -182,9 +183,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
 
         selectedMaghrebTime = formatter
             .format(prayerTimes!.timeForPrayer(Adhan.Prayer.maghrib)!)
-            .toString()
-            .replaceAll('AM', '')
-            .replaceAll('PM', '');
+            .toString();
 
         timeLimitCurrentPrayer = nextPrayerTime != null
             ? formatter.format(nextPrayerTime!).toString()
@@ -704,7 +703,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
                                 setState(() {
                                   print(
                                       "${selectedPlace!.geometry!.location.lat}  ${selectedPlace!.geometry!.location.lng}");
-                                  selectedPosition = new GeoFirePoint(
+                                  selectedPosition = new GeoPoint(
                                       selectedPlace!.geometry!.location.lat,
                                       selectedPlace!.geometry!.location.lng);
                                   LatLng newlatlang = LatLng(
@@ -746,7 +745,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
                               //           borderRadius: BorderRadius.circular(12.0),
                               //           child: state == SearchingState.Searching
                               //               ? Center(child: CircularProgressIndicator())
-                              //               : RaisedButton(
+                              //               : ElevatedButton(
                               //                   child: Text("Pick Here"),
                               //                   onPressed: () {
                               //                     // IMPORTANT: You MUST manage selectedPlace data yourself as using this build will not invoke onPlacePicker as
@@ -818,7 +817,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
             ),
             actions: <Widget>[
               ElevatedButton(
-                style: AppThemes.raisedButtonStyle,
+                style: AppThemes.ElevatedButtonStyle,
                 child: Text('OK'),
                 onPressed: () {
                   setState(() {
@@ -869,7 +868,7 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
             ),
             actions: <Widget>[
               ElevatedButton(
-                style: AppThemes.raisedButtonStyle,
+                style: AppThemes.ElevatedButtonStyle,
                 child: Text('OK'),
                 onPressed: () {
                   setState(() {

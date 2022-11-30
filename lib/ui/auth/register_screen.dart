@@ -106,7 +106,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ? Center(
                         child: CircularProgressIndicator(),
                       )
-                    : RaisedButton(
+                    : ElevatedButton(
                         child: Text(
                           AppLocalizations.of(context)
                               .translate("loginBtnSignUp"),
@@ -123,7 +123,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     _passwordController.text);
 
                             if (userModel == null) {
-                              _scaffoldKey.currentState!.showSnackBar(SnackBar(
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
                                 content: Text(AppLocalizations.of(context)
                                     .translate("loginTxtErrorSignIn")),
                               ));
@@ -147,10 +148,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ? Center(
                         child: null,
                       )
-                    : FlatButton(
-                        child: Text(AppLocalizations.of(context)
-                            .translate("loginBtnLinkSignIn")),
-                        textColor: Theme.of(context).iconTheme.color,
+                    : TextButton(
+                        child: Text(
+                          AppLocalizations.of(context)
+                              .translate("loginBtnLinkSignIn"),
+                          style: TextStyle(
+                              color: Theme.of(context).iconTheme.color),
+                        ),
                         onPressed: () {
                           Navigator.of(context)
                               .pushReplacementNamed(Routes.login);

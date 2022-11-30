@@ -90,7 +90,7 @@ class TodosScreen extends StatelessWidget {
                     onDismissed: (direction) {
                       firestoreDatabase.deleteTodo(todos[index]);
 
-                      _scaffoldKey.currentState!.showSnackBar(SnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         backgroundColor: Theme.of(context).appBarTheme.color,
                         content: Text(
                           AppLocalizations.of(context)

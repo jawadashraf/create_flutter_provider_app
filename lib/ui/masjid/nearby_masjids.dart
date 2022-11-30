@@ -3,12 +3,17 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:geoflutterfire/geoflutterfire.dart';
+
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:noteapp/constants/app_themes.dart';
+import 'package:noteapp/models/masjid_model.dart';
 import 'package:noteapp/models/pin_information.dart';
+import 'package:noteapp/services/firestore_database.dart';
+import 'package:noteapp/services/firestore_path.dart';
+import 'package:noteapp/services/firestore_service.dart';
 import 'package:noteapp/ui/masjid/main_pin_pill.dart';
+import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -28,6 +33,7 @@ class NearByMasjidsScreen extends StatefulWidget {
 class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
   GoogleMapController? _mapController;
   TextEditingController? _latitudeController, _longitudeController;
+  final _firestoreService = FirestoreService.instance;
 
   // firestore init
   final radius = BehaviorSubject<double>.seeded(20.0);
@@ -35,7 +41,6 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
   var markers = <MarkerId, Marker>{};
 
   late Stream<List<DocumentSnapshot>> stream;
-  late Geoflutterfire geo;
 
   LatLng? cameraCenter = LatLng(33.58757, 71.44239);
 
@@ -72,20 +77,52 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
     setState(() {
       loading = false;
     });
-    if (currentPosition != null) geo = Geoflutterfire();
-    {
-      GeoFirePoint center = geo.point(
-          latitude: currentPosition!.latitude,
-          longitude: currentPosition!.longitude);
-      stream = radius.switchMap((rad) {
-        final collectionReference = _firestore.collection('masjids');
+    // if (currentPosition != null) geo = Geoflutterfire();
 
-        return geo.collection(collectionRef: collectionReference).within(
-            center: center, radius: rad, field: 'position', strictMode: true);
+    {
+      GeoPoint center =
+          new GeoPoint(currentPosition!.latitude, currentPosition!.longitude);
+      stream = radius.switchMap((rad) {
+        // final collectionReference = _firestore.collection('masjids');
+
+        // return geo.collection(collectionRef: collectionReference).within(
+        //     center: center, radius: rad, field: 'position', strictMode: true);
+
+        return getMasjidsAroundMeStream(center, rad);
       });
 
       _loadMapStyles();
     }
+  }
+
+  Stream<List<DocumentSnapshot>> getMasjidsAroundMeStream(
+      GeoPoint position, double distance) {
+    double lat = 0.0144927536231884;
+    double lon = 0.0181818181818182;
+    // double distance = 50;
+    // 1000 * 0.000621371;
+    double lowerLat = position.latitude - (lat * distance);
+    double lowerLon = position.longitude - (lon * distance);
+    double greaterLat = position.latitude + (lat * distance);
+    double greaterLon = position.longitude + (lon * distance);
+    GeoPoint lesserGeopoint = GeoPoint(lowerLat, lowerLon);
+    GeoPoint greaterGeopoint = GeoPoint(greaterLat, greaterLon);
+
+    Query query =
+        FirebaseFirestore.instance.collection(FirestorePath.masjids());
+
+    query = query
+        .where("position", isGreaterThan: lesserGeopoint)
+        .where("position", isLessThan: greaterGeopoint);
+
+    final Stream<QuerySnapshot> snapshots = query.snapshots();
+    // final allData = snapshots. .docs.map((doc) => doc.data()).toList();
+
+    return snapshots.map((snapshot) {
+      final result = snapshot.docs.map((snapshot) => snapshot).toList();
+
+      return result;
+    });
   }
 
   Future _loadMapStyles() async {
@@ -157,6 +194,10 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
+
+    final firestoreDatabase =
+        Provider.of<FirestoreDatabase>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Masjid near me'),

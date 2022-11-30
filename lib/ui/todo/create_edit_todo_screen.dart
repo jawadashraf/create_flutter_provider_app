@@ -54,7 +54,7 @@ class _CreateEditTodoScreenState extends State<CreateEditTodoScreen> {
             : AppLocalizations.of(context)
                 .translate("todosCreateEditAppBarTitleNewTxt")),
         actions: <Widget>[
-          FlatButton(
+          TextButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   FocusScope.of(context).unfocus();

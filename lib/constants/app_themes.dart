@@ -86,7 +86,7 @@ class AppThemes {
     caption: _darkScreenCaptionTextStyle,
   );
 
-  static final ButtonStyle raisedButtonStyle = ElevatedButton.styleFrom(
+  static final ButtonStyle ElevatedButtonStyle = ElevatedButton.styleFrom(
     onPrimary: Colors.black87,
     primary: _darkButtonPrimaryColor,
     minimumSize: Size(88, 36),
@@ -196,7 +196,7 @@ class AppThemes {
       buttonTheme: ButtonThemeData(
           buttonColor: _darkButtonPrimaryColor,
           textTheme: ButtonTextTheme.primary),
-      elevatedButtonTheme: ElevatedButtonThemeData(style: raisedButtonStyle),
+      elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButtonStyle),
       unselectedWidgetColor: _darkPrimaryColor,
       inputDecorationTheme: InputDecorationTheme(
           fillColor: _darkPrimaryColor,

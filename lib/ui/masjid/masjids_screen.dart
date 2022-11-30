@@ -12,6 +12,7 @@ import 'package:noteapp/models/user_model.dart';
 import 'package:noteapp/providers/auth_provider.dart';
 import 'package:noteapp/routes.dart';
 import 'package:noteapp/services/firestore_database.dart';
+// import 'package:noteapp/services/firestore_database.dart';
 import 'package:noteapp/ui/masjid/masjid_list_item.dart';
 import 'package:noteapp/ui/masjid/masjids_created_by_me_screen.dart';
 import 'package:noteapp/ui/masjid/nearby_masjids.dart';
