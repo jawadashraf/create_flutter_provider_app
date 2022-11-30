@@ -64,8 +64,7 @@ class Masjid {
     String createdBy = data['createdBy'];
 
     GeoPoint? position = data["position"] != null
-        ? GeoPoint(data["position"]["geopoint"].latitude,
-            data["position"]["geopoint"].longitude)
+        ? GeoPoint(data["position"].latitude, data["position"].longitude)
         : null;
 
     return Masjid(

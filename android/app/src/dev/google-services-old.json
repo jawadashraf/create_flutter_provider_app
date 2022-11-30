@@ -14,22 +14,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "696579514446-5oalmmkgsa1m2etjq99vpr23nu20onn6.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.hayat.masjid",
-            "certificate_hash": "83d0f374be5646204723daa3d164ad667905787b"
-          }
-        },
-        {
-          "client_id": "696579514446-j4t69nj54oc0l2iotrdidjvq7f9segd6.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.hayat.masjid",
-            "certificate_hash": "dca7a5f884a8d6b59829c9d96dea7ab2419d4e94"
-          }
-        },
-        {
           "client_id": "696579514446-483b385nq82k08vhjigm07f84jkl4nqs.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -58,22 +42,6 @@
         }
       },
       "oauth_client": [
-        {
-          "client_id": "696579514446-g0urirq8p2bgmfepfh699ja99rmkdat3.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.hayat.masjid.dev",
-            "certificate_hash": "dca7a5f884a8d6b59829c9d96dea7ab2419d4e94"
-          }
-        },
-        {
-          "client_id": "696579514446-tcfro2na40u8532tarerqklqmpda7ojd.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.hayat.masjid.dev",
-            "certificate_hash": "83d0f374be5646204723daa3d164ad667905787b"
-          }
-        },
         {
           "client_id": "696579514446-483b385nq82k08vhjigm07f84jkl4nqs.apps.googleusercontent.com",
           "client_type": 3

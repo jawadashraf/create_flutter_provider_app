@@ -13,7 +13,7 @@ class AppThemes {
       'Location permission granted.';
 
   static const String googleMapApiKey =
-      'AIzaSyBfrNO5OZyrGJ0X7iQpJrS7wqsqsxSBo4k';
+      'AIzaSyCO9IkDz-IX1wZ2jKi7to_X6wiGRhNygX0'; //AIzaSyCO9IkDz-IX1wZ2jKi7to_X6wiGRhNygX0
 
   static const Color color3 = Color(0xFF1c1c1c);
 
