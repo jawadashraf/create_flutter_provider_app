@@ -63,6 +63,8 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
 
   bool loading = false;
 
+  var _zoomLevel = 11.0;
+
   @override
   void initState() {
     super.initState();
@@ -83,6 +85,7 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
       GeoPoint center =
           new GeoPoint(currentPosition!.latitude, currentPosition!.longitude);
       stream = radius.switchMap((rad) {
+        log("jinfo: rad $rad");
         // final collectionReference = _firestore.collection('masjids');
 
         // return geo.collection(collectionRef: collectionReference).within(
@@ -91,12 +94,51 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
         return getMasjidsAroundMeStream(center, rad);
       });
 
+      // _updateMarkers(await stream.first);
+
       _loadMapStyles();
     }
   }
 
-  Stream<List<DocumentSnapshot>> getMasjidsAroundMeStream(
+  Future updateMapToBounds({List<LatLng> list = const []}) async {
+    await Future.delayed(Duration(milliseconds: 50));
+
+    // list = list.isEmpty
+    //     ? markers.map((loc) => loc.marker.position).toList()
+    //     : list;
+
+    if (list.isEmpty) {
+      list.add(cameraCenter ?? new LatLng(33.58757, 71.44239));
+    }
+    var zoomLevel = 0.0;
+
+    {
+      zoomLevel = MapsUtil.getBoundsZoomLevel(
+              MapsUtil.getBoundsFromLatLngList(list),
+              Size(
+                MediaQuery.of(context).size.width,
+                MediaQuery.of(context).size.height,
+              )) +
+          1;
+
+      zoomLevel = zoomLevel == double.infinity ? _zoomLevel : zoomLevel;
+    }
+
+    LatLng temp = MapsUtil.getCentralLatlng(list);
+
+    _zoomLevel = zoomLevel;
+
+    _mapController!.animateCamera(
+      CameraUpdate.newCameraPosition(CameraPosition(
+        target: temp,
+        zoom: _zoomLevel,
+      )),
+    );
+  }
+
+  Stream<List<QueryDocumentSnapshot>> getMasjidsAroundMeStream(
       GeoPoint position, double distance) {
+    log("jinfo: getMasjidsAroundMe called ${position.latitude}");
     double lat = 0.0144927536231884;
     double lon = 0.0181818181818182;
     // double distance = 50;
@@ -112,17 +154,18 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
         FirebaseFirestore.instance.collection(FirestorePath.masjids());
 
     query = query
-        .where("position", isGreaterThan: lesserGeopoint)
-        .where("position", isLessThan: greaterGeopoint);
+        .where("coordinates", isGreaterThan: lesserGeopoint)
+        .where("coordinates", isLessThan: greaterGeopoint);
 
     final Stream<QuerySnapshot> snapshots = query.snapshots();
-    // final allData = snapshots. .docs.map((doc) => doc.data()).toList();
-
-    return snapshots.map((snapshot) {
+    // final allData = snapshots.docs.map((doc) => doc.data()).toList();
+    var temp = snapshots.map((snapshot) {
+      log("jinfo: getMasjidsAroundMe snapshots.map ${snapshot.docs.length}");
       final result = snapshot.docs.map((snapshot) => snapshot).toList();
 
       return result;
     });
+    return temp;
   }
 
   Future _loadMapStyles() async {
@@ -188,6 +231,7 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
     _latitudeController?.dispose();
     _longitudeController?.dispose();
     radius.close();
+
     super.dispose();
   }
 
@@ -243,8 +287,9 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
                               GoogleMap(
                                 onMapCreated: _onMapCreated,
                                 initialCameraPosition: CameraPosition(
-                                  target: cameraCenter!,
-                                  zoom: 11.0,
+                                  target: cameraCenter ??
+                                      LatLng(33.58757, 71.44239),
+                                  zoom: _zoomLevel,
                                 ),
                                 markers: Set<Marker>.of(markers.values),
                                 onTap: (LatLng location) {
@@ -296,7 +341,15 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
 //      _showHome();
       //start listening after map is created
       stream.listen((List<DocumentSnapshot> documentList) {
+        log("jinfo: Stream started");
+        log("jinfo: documentList ${documentList.length}");
+
         _updateMarkers(documentList);
+        updateMapToBounds(
+            list: markers.entries
+                .map((e) => new LatLng(
+                    e.value.position.latitude, e.value.position.longitude))
+                .toList());
       });
     });
   }
@@ -304,8 +357,10 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
   Future<void> _addMarker(double lat, double lng, String name, String masjidId,
       String urduName) async {
     final id = MarkerId(lat.toString() + lng.toString());
+    log("jinfo: loading markerIcon");
     final Uint8List markerIcon =
         await MapsUtil.getBytesFromAsset('assets/img/masjid_marker.png', 120);
+    log("jinfo: setting _marker");
     final _marker = Marker(
       markerId: id,
       position: LatLng(lat, lng),
@@ -328,23 +383,27 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
       },
     );
     setState(() {
+      log("jinfo: markers[id]=_marker");
       markers[id] = _marker;
     });
   }
 
   void _updateMarkers(List<DocumentSnapshot> documentList) {
     cameraCenter = null;
+    log("jinfo: _updateMarker called");
+    log("jinfo: _updateMarker called documentList ${documentList.length}");
 
     documentList.forEach((DocumentSnapshot document) {
       final data = document.data() as Map<String, dynamic>;
-
-      final GeoPoint point = data['position']['geopoint'];
+      log("jinfo: _updateMarker called data ${data.toString()}");
+      final GeoPoint point = data['coordinates']; //['geopoint'];
       final name = data['enName'];
       final id = document.id;
       final urduName = data['urduName'];
 
       if (cameraCenter == null)
         cameraCenter = LatLng(point.latitude, point.longitude);
+      log("jinfo: marker data ${data.toString()}");
       _addMarker(point.latitude, point.longitude, name, id, urduName);
     });
 
@@ -357,13 +416,6 @@ class _NearByMasjidsScreenState extends State<NearByMasjidsScreen> {
 
       _mapController!.moveCamera(update);
     }
-    // _mapController!.animateCamera(CameraUpdate.newCameraPosition(
-    //     CameraPosition(
-    //         target: LatLng(markers[0]!.position.latitude,
-    //             markers[0]!.position.longitude),
-    //         zoom: 8)
-    //     //17 is new zoom level
-    //     ));
   }
 
   double _value = 20.0;

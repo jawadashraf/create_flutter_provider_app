@@ -81,7 +81,8 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
   //     _masjid?.maghrebTime != selectedMaghrebTime;
   bool get _hasChangedIshaTime => _masjid?.ishaTime != selectedIshaTime;
   bool get _hasChangedJummahTime => _masjid?.jummahTime != selectedJummahTime;
-  bool get _hasChangedPosition => _masjid?.position != selectedPosition;
+  // bool get _hasChangedPosition => _masjid?.position != selectedPosition;
+  bool get _hasChangedPosition => _masjid?.coordinates != selectedPosition;
 
   bool get _hasChangedValue =>
       _hasChangedEnName ||
@@ -96,7 +97,9 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
 
   DateFormat formatter = DateFormat('jm');
 
-  String _groupValue = "None";
+  String _groupValue = getStringAsync("masjidNameDisplay").isEmpty
+      ? "None"
+      : getStringAsync("masjidNameDisplay");
 
   List<String> _status = ["None", "English", "Urdu", "Both"];
   bool displayArabic = true;
@@ -141,7 +144,8 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
     // selectedMaghrebTime = _masjid?.maghrebTime ?? "00:00 AM";
     selectedJummahTime = _masjid?.jummahTime ?? "00:00 AM";
     selectedIshaTime = _masjid?.ishaTime ?? "00:00 AM";
-    selectedPosition = _masjid?.position;
+    // selectedPosition = _masjid?.position;
+    selectedPosition = _masjid?.coordinates;
 
     setState(() {});
     if (selectedPosition != null)
@@ -284,21 +288,25 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
         case 'English Name':
           setState(() {
             _groupValue = "English";
+            setValue("masjidNameDisplay", _groupValue);
           });
           break;
         case 'Urdu Name':
           setState(() {
             _groupValue = "Urdu";
+            setValue("masjidNameDisplay", _groupValue);
           });
           break;
         case 'Both Names':
           setState(() {
             _groupValue = "Both";
+            setValue("masjidNameDisplay", _groupValue);
           });
           break;
         case 'No Names':
           setState(() {
             _groupValue = "None";
+            setValue("masjidNameDisplay", _groupValue);
           });
           break;
         case 'Urdu Prayer':
@@ -396,7 +404,8 @@ class _CreateEditMasjidScreenState extends State<CreateEditMasjidScreen> {
               maghrebTime: selectedMaghrebTime,
               ishaTime: selectedIshaTime,
               jummahTime: selectedJummahTime,
-              position: selectedPosition,
+              // position: selectedPosition,
+              coordinates: selectedPosition,
               createdBy: firestoreDatabase.uid))
           .then((value) {
         firestoreDatabase.setMyMasjid(masjidId).then((value) {

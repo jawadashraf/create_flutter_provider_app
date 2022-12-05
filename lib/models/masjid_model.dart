@@ -14,7 +14,8 @@ class Masjid {
   String maghrebTime;
   String ishaTime;
   String jummahTime;
-  GeoPoint? position;
+  // GeoPoint? positionOld;
+  GeoPoint? coordinates;
   String createdBy;
 
   Masjid(
@@ -29,7 +30,8 @@ class Masjid {
       required this.maghrebTime,
       required this.ishaTime,
       required this.jummahTime,
-      this.position,
+      // this.position,
+      this.coordinates,
       required this.createdBy});
 
   factory Masjid.fromMap(Map<String, dynamic> data, String documentId) {
@@ -63,8 +65,12 @@ class Masjid {
     //     minute: int.parse(data['jummahTime'].split(":")[1]));
     String createdBy = data['createdBy'];
 
-    GeoPoint? position = data["position"] != null
-        ? GeoPoint(data["position"].latitude, data["position"].longitude)
+    // GeoPoint? position = data["position"] != null
+    //     ? GeoPoint(data["position"].latitude, data["position"].longitude)
+    //     : null;
+
+    GeoPoint? coordinates = data["coordinates"] != null
+        ? GeoPoint(data["coordinates"].latitude, data["coordinates"].longitude)
         : null;
 
     return Masjid(
@@ -79,7 +85,8 @@ class Masjid {
         maghrebTime: maghrebTime,
         ishaTime: ishaTime,
         jummahTime: jummahTime,
-        position: position,
+        // position: position,
+        coordinates: coordinates,
         createdBy: createdBy);
   }
 
@@ -95,7 +102,8 @@ class Masjid {
       'maghrebTime': maghrebTime,
       'ishaTime': ishaTime,
       'jummahTime': jummahTime,
-      'position': position,
+      // 'position': position,
+      'coordinates': coordinates,
       'createdBy': createdBy
     };
   }
